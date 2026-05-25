@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title="Source Event Inspector" icon-name="standard:code_playground">
+        <div class="slds-grid slds-gutters slds-p-horizontal_medium slds-p-bottom_medium">
+            <div class="slds-col slds-size_2-of-3">
+                <template lwc:if={hasJson}>
+                    <pre class="json-block">{prettyJson}</pre>
+                </template>
+                <template lwc:else>
+                    <p class="slds-text-color_weak">No source event payload available.</p>
+                </template>
+            </div>
+            <div class="slds-col slds-size_1-of-3">
+                <h3 class="slds-text-title_caps slds-m-bottom_small">Baseline Divergences</h3>
+                <template lwc:if={diffError}>
+                    <p class="slds-text-color_error">{diffError}</p>
+                </template>
+                <template lwc:if={hasDiff}>
+                    <ul>
+                        <template for:each={diffRows} for:item="d">
+                            <li key={d.path} class="diff-path">{d.path}</li>
+                        </template>
+                    </ul>
+                </template>
+                <template lwc:else>
+                    <p class="slds-text-color_weak">No divergence from baseline.</p>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

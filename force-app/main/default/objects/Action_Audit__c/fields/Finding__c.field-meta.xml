@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Finding__c</fullName>
+    <label>Finding</label>
+    <referenceTo>Security_Finding__c</referenceTo>
+    <relationshipLabel>Action Audits</relationshipLabel>
+    <relationshipName>Action_Audits</relationshipName>
+    <required>false</required>
+    <type>Lookup</type>
+</CustomField>

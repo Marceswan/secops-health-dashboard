@@ -1,0 +1,8 @@
+.sfdx/
+.sfdx-graph/
+.sf/
+.localdevserver/
+.vscode/
+node_modules/
+*.log
+.DS_Store

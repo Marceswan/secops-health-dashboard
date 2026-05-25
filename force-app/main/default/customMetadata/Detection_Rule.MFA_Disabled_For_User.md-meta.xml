@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>MFA Disabled For User</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class__c</field>
+        <value xsi:type="xsd:string">Rule_MfaDisabledForUser</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Setup Change</value>
+    </values>
+    <values>
+        <field>Default_Risk_Score__c</field>
+        <value xsi:type="xsd:double">75.0</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Scans recent SetupAuditTrail entries for Multi-Factor Authentication being disabled for individual users. Disabling MFA reverts a key compensating control, so each occurrence should be reviewed and either restored or formally approved.</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Remediation_Guidance__c</field>
+        <value xsi:type="xsd:string">Verify with the change author that disabling MFA was intentional and approved. If not, re-enable the MFA requirement for the affected user and review the actor's recent admin activity. If approved, attach the change ticket to the finding's resolution notes.</value>
+    </values>
+    <values>
+        <field>Required_Capability__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Run_Frequency__c</field>
+        <value xsi:type="xsd:string">Every Run</value>
+    </values>
+    <values>
+        <field>Severity__c</field>
+        <value xsi:type="xsd:string">High</value>
+    </values>
+</CustomMetadata>

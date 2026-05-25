@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>Privileged PermSet Granted</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class__c</field>
+        <value xsi:type="xsd:string">Rule_PrivilegedPermSetGranted</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Privilege Escalation</value>
+    </values>
+    <values>
+        <field>Default_Risk_Score__c</field>
+        <value xsi:type="xsd:double">75.0</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Flags PermissionSet assignments granted in the last 24 hours where the permission set carries Modify All Data, Manage Users, or has a label containing "admin". These permissions effectively elevate the assignee to a privileged role, and every grant should be tied to a documented business reason.</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Remediation_Guidance__c</field>
+        <value xsi:type="xsd:string">Confirm with the actor and the assignee's manager that the grant was approved and the assignee has a documented need. If not, remove the assignment and review the actor's recent admin activity for further unauthorized changes. If legitimate, attach the approval reference to the finding's resolution notes.</value>
+    </values>
+    <values>
+        <field>Required_Capability__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Run_Frequency__c</field>
+        <value xsi:type="xsd:string">Every Run</value>
+    </values>
+    <values>
+        <field>Severity__c</field>
+        <value xsi:type="xsd:string">High</value>
+    </values>
+</CustomMetadata>

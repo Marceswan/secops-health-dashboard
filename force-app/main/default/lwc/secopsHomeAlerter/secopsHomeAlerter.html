@@ -1,0 +1,17 @@
+<template>
+    <lightning-card title="SecOps Alerts" icon-name={cardIcon}>
+        <div class="slds-p-around_medium slds-text-align_center">
+            <button
+                type="button"
+                class="slds-button slds-button_reset"
+                onclick={handleClick}
+                aria-label="Open SecOps triage">
+                <p class="slds-text-heading_large">{count}</p>
+                <p class="slds-text-body_regular slds-m-top_x-small">{headline}</p>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_x-small">
+                    Click to open triage
+                </p>
+            </button>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>LoginAs Outside Hours</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class__c</field>
+        <value xsi:type="xsd:string">Rule_LoginAsOutsideHours</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Login Anomaly</value>
+    </values>
+    <values>
+        <field>Default_Risk_Score__c</field>
+        <value xsi:type="xsd:double">50.0</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Flags LoginAs impersonation events (admin assuming another user's session) that occurred outside business hours, defined as 08:00 through 18:00. Off-hours admin impersonation is a high-signal anomaly because legitimate support sessions almost always happen during normal business hours.</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Remediation_Guidance__c</field>
+        <value xsi:type="xsd:string">Identify the impersonating admin and confirm the session was authorized (ticket, on-call rotation, scheduled maintenance). If unexplained, revoke the admin's session, rotate credentials, and review actions taken during the impersonation window in Setup Audit Trail and field history.</value>
+    </values>
+    <values>
+        <field>Required_Capability__c</field>
+        <value xsi:type="xsd:string">EventLogFile</value>
+    </values>
+    <values>
+        <field>Run_Frequency__c</field>
+        <value xsi:type="xsd:string">Every Run</value>
+    </values>
+    <values>
+        <field>Severity__c</field>
+        <value xsi:type="xsd:string">Medium</value>
+    </values>
+</CustomMetadata>

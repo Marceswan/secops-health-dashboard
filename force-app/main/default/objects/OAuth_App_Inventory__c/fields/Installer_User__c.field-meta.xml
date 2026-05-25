@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Installer_User__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Installer User</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Installed OAuth Apps</relationshipLabel>
+    <relationshipName>Installed_OAuth_Apps</relationshipName>
+    <required>false</required>
+    <type>Lookup</type>
+</CustomField>

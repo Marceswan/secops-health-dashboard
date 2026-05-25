@@ -1,0 +1,8 @@
+# .forceignore v2
+.forceignore
+**/jsconfig.json
+**/.eslintrc.json
+**/lwc/**/__tests__/**
+
+# Shield-only metadata — not included in standard deploys
+optional-shield/**

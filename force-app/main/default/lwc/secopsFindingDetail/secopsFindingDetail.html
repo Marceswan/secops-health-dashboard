@@ -1,0 +1,107 @@
+<template>
+    <lightning-card title="Finding Detail" icon-name="standard:incident">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={wireError}>
+                <p class="slds-text-color_error">Unable to load finding.</p>
+            </template>
+            <template lwc:elseif={hasRecord}>
+                <div class="slds-grid slds-wrap slds-grid_pull-padded">
+                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_x-small">
+                        <p class="slds-text-title_caps">Status</p>
+                        <p>{status}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_x-small">
+                        <p class="slds-text-title_caps">Severity</p>
+                        <p>{severity}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_small">
+                        <p class="slds-text-title_caps">Category</p>
+                        <p>{category}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_small">
+                        <p class="slds-text-title_caps">Detection Rule</p>
+                        <p>{rule}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_small">
+                        <p class="slds-text-title_caps">Subject User</p>
+                        <p>{userName}</p>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-horizontal_x-small slds-p-top_small">
+                        <p class="slds-text-title_caps">Subject App</p>
+                        <p>{appName}</p>
+                    </div>
+                    <template lwc:if={dismissalReason}>
+                        <div class="slds-col slds-size_1-of-1 slds-p-horizontal_x-small slds-p-top_small">
+                            <p class="slds-text-title_caps">Dismissal Reason</p>
+                            <p>{dismissalReason}</p>
+                        </div>
+                    </template>
+                    <template lwc:if={resolvedAt}>
+                        <div class="slds-col slds-size_1-of-1 slds-p-horizontal_x-small slds-p-top_small">
+                            <p class="slds-text-title_caps">Resolved At</p>
+                            <p><lightning-formatted-date-time value={resolvedAt} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time></p>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="slds-m-top_medium slds-grid slds-gutters_x-small">
+                    <template lwc:if={canAcknowledge}>
+                        <lightning-button label="Acknowledge" variant="neutral" onclick={handleAcknowledge} disabled={busy}></lightning-button>
+                    </template>
+                    <template lwc:if={canRemediate}>
+                        <lightning-button label="Mark Remediated" variant="success" onclick={handleMarkRemediated} disabled={busy} class="slds-m-left_x-small"></lightning-button>
+                    </template>
+                    <template lwc:if={canDismiss}>
+                        <lightning-button label="Dismiss" variant="destructive-text" onclick={openDismissModal} disabled={busy} class="slds-m-left_x-small"></lightning-button>
+                    </template>
+                </div>
+
+                <c-secops-remediation-panel finding={findingForPanel} onremediated={handleRemediated}></c-secops-remediation-panel>
+
+                <template lwc:if={prettySource}>
+                    <div class="slds-m-top_medium">
+                        <p class="slds-text-title_caps">Source Event JSON</p>
+                        <pre class="slds-box slds-box_x-small slds-text-body_small">{prettySource}</pre>
+                    </div>
+                </template>
+
+                <template lwc:if={hasHistory}>
+                    <div class="slds-m-top_medium">
+                        <p class="slds-text-title_caps">Action History</p>
+                        <pre class="slds-box slds-box_x-small slds-text-body_small">{history}</pre>
+                    </div>
+                </template>
+            </template>
+            <template lwc:else>
+                <lightning-spinner alternative-text="Loading finding" size="small"></lightning-spinner>
+            </template>
+        </div>
+
+        <template lwc:if={showDismissModal}>
+            <section role="dialog" tabindex="-1" aria-labelledby="dismiss-modal-title" aria-modal="true" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeDismissModal}>
+                            <lightning-icon icon-name="utility:close" size="small" variant="inverse" alternative-text="Close"></lightning-icon>
+                        </button>
+                        <h2 id="dismiss-modal-title" class="slds-modal__title slds-hyphenate">Dismiss Finding</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input
+                            type="text"
+                            label="Reason for dismissal"
+                            value={dismissReason}
+                            onchange={handleReasonChange}
+                            required>
+                        </lightning-input>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeDismissModal} class="slds-m-right_x-small"></lightning-button>
+                        <lightning-button label="Dismiss" variant="destructive" onclick={handleDismissConfirm} disabled={busy}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </lightning-card>
+</template>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>ModifyAllData Granted</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class__c</field>
+        <value xsi:type="xsd:string">Rule_ModifyAllDataGranted</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Privilege Escalation</value>
+    </values>
+    <values>
+        <field>Default_Risk_Score__c</field>
+        <value xsi:type="xsd:double">75.0</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Flags PermissionSet assignments in the last 24 hours where the assigned permission set carries Modify All Data or View All Data. These permissions are functionally equivalent to admin access for the affected user and should be reviewed each time they are granted.</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Remediation_Guidance__c</field>
+        <value xsi:type="xsd:string">Confirm the assignment was approved by the user's manager and that the user has a documented business need. If not, remove the assignment and review the assignee's recent activity. If the grant is legitimate, attach the approval reference to the finding's resolution notes.</value>
+    </values>
+    <values>
+        <field>Required_Capability__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Run_Frequency__c</field>
+        <value xsi:type="xsd:string">Every Run</value>
+    </values>
+    <values>
+        <field>Severity__c</field>
+        <value xsi:type="xsd:string">High</value>
+    </values>
+</CustomMetadata>

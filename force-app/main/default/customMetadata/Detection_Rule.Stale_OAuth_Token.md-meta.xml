@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>Stale OAuth Token</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class__c</field>
+        <value xsi:type="xsd:string">Rule_StaleOauthToken</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">OAuth Risk</value>
+    </values>
+    <values>
+        <field>Default_Risk_Score__c</field>
+        <value xsi:type="xsd:double">25.0</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Fires when an OauthToken's LastUsedDate is more than 90 days old. Tokens left dormant often correspond to departed employees, decommissioned integrations, or shadow-IT trials, and continue to widen the OAuth attack surface until revoked.</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Remediation_Guidance__c</field>
+        <value xsi:type="xsd:string">Confirm with the token owner whether the integration is still needed. If not, revoke the token in Setup &gt; Connected Apps OAuth Usage. If still required but rarely used, document the business justification and consider tightening the connected app's IP restrictions or session settings.</value>
+    </values>
+    <values>
+        <field>Required_Capability__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>Run_Frequency__c</field>
+        <value xsi:type="xsd:string">Every Run</value>
+    </values>
+    <values>
+        <field>Severity__c</field>
+        <value xsi:type="xsd:string">Low</value>
+    </values>
+</CustomMetadata>

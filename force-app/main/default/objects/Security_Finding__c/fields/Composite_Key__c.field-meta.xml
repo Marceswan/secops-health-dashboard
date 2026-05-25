@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Composite_Key__c</fullName>
+    <formula>Detection_Rule__c &amp; &quot;|&quot; &amp; CASESAFEID(Subject_User__c) &amp; &quot;|&quot; &amp; Source_Event_Id__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Composite Key</label>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

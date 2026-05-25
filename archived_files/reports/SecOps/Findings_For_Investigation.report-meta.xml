@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>NAME</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Severity__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Category__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Detection_Rule__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Subject_User__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Subject_App__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Risk_Score__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.Status__c</field>
+    </columns>
+    <columns>
+        <field>Security_Finding__c.CreatedDate</field>
+    </columns>
+    <filter>
+        <criteriaItems>
+            <column>Security_Finding__c.Status__c</column>
+            <operator>notEqual</operator>
+            <value>Dismissed</value>
+        </criteriaItems>
+    </filter>
+    <format>Tabular</format>
+    <name>Findings For Investigation</name>
+    <reportType>CustomEntity$Security_Finding__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <sortColumn>Security_Finding__c.Risk_Score__c</sortColumn>
+    <sortOrder>Desc</sortOrder>
+</Report>

@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title="Detection Rule Catalog" icon-name="standard:dataset">
+        <template if:true={error}>
+            <div class="slds-var-p-around_medium slds-text-color_error">
+                Failed to load rule catalog.
+            </div>
+        </template>
+
+        <template if:true={hasRules}>
+            <div class="slds-var-p-around_x-small">
+                <lightning-datatable
+                    key-field="Id"
+                    data={rules}
+                    columns={columns}
+                    draft-values={draftValues}
+                    onsave={handleSave}
+                    oncancel={handleCancel}
+                    hide-checkbox-column
+                    suppress-bottom-bar="false">
+                </lightning-datatable>
+            </div>
+        </template>
+
+        <template if:false={hasRules}>
+            <div class="slds-var-p-around_medium slds-text-color_weak">
+                No detection rules found.
+            </div>
+        </template>
+    </lightning-card>
+</template>

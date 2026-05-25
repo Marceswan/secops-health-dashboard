@@ -1,0 +1,42 @@
+<template>
+    <lightning-card title="Baseline Health" icon-name="standard:metrics">
+        <div slot="actions">
+            <lightning-button
+                label="Refresh All"
+                variant="neutral"
+                onclick={handleRefreshAll}
+                disabled={isRefreshing}>
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={error}>
+                <div class="slds-text-color_error">Failed to load baseline stats.</div>
+            </template>
+
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-3">
+                    <p class="slds-text-title">Active Users</p>
+                    <p class="slds-text-heading_medium">{totalUsers}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <p class="slds-text-title">With Baseline</p>
+                    <p class="slds-text-heading_medium">{usersWithBaseline}</p>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <p class="slds-text-title">Without Baseline</p>
+                    <p class="slds-text-heading_medium">{usersWithoutBaseline}</p>
+                </div>
+            </div>
+
+            <div class="slds-m-top_medium">
+                <p class="slds-text-body_small slds-text-color_weak">
+                    Oldest refresh: {oldestRefreshLabel}
+                </p>
+                <p class="slds-text-body_small slds-text-color_weak">
+                    Newest refresh: {newestRefreshLabel}
+                </p>
+            </div>
+        </div>
+    </lightning-card>
+</template>

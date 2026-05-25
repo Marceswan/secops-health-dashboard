@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resolved_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Resolved By</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Security Findings (Resolved By)</relationshipLabel>
+    <relationshipName>Security_Findings_Resolved_By</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,105 @@
+<template>
+    <lightning-card title="Risk Trend (90 days)" icon-name="utility:trending">
+        <div class="slds-var-p-horizontal_medium">
+            <template lwc:if={hasError}>
+                <p class="slds-text-color_error">Unable to load risk trend.</p>
+            </template>
+
+            <template lwc:if={hasData}>
+                <svg
+                    width={chartWidth}
+                    height={chartHeight}
+                    viewBox="0 0 600 200"
+                    role="img"
+                    aria-label="Critical and High severity finding counts over the last 90 days"
+                    class="risk-trend-chart"
+                >
+                    <!-- Y axis grid + labels -->
+                    <template for:each={yLabels} for:item="label">
+                        <g key={label.key}>
+                            <line
+                                class="grid-line"
+                                x1="36"
+                                x2="588"
+                                y1={label.y}
+                                y2={label.y}
+                                stroke-width="1"
+                            ></line>
+                            <text
+                                class="axis-label"
+                                x="32"
+                                y={label.y}
+                                text-anchor="end"
+                                dominant-baseline="central"
+                                font-size="10"
+                            >{label.value}</text>
+                        </g>
+                    </template>
+
+                    <!-- High series (orange) -->
+                    <polyline
+                        class="series-high"
+                        points={highPoints}
+                        fill="none"
+                        stroke-width="2"
+                    ></polyline>
+
+                    <!-- Critical series (red) -->
+                    <polyline
+                        class="series-critical"
+                        points={criticalPoints}
+                        fill="none"
+                        stroke-width="2"
+                    ></polyline>
+
+                    <!-- X axis labels -->
+                    <template for:each={xLabels} for:item="xl">
+                        <text
+                            class="axis-label"
+                            key={xl.key}
+                            x={xl.x}
+                            y="195"
+                            text-anchor="middle"
+                            font-size="10"
+                        >{xl.label}</text>
+                    </template>
+                </svg>
+
+                <div class="slds-grid slds-grid_align-center slds-var-m-top_x-small">
+                    <span class="slds-var-m-right_medium">
+                        <span class="legend-swatch legend-swatch-critical"></span>
+                        Critical
+                    </span>
+                    <span>
+                        <span class="legend-swatch legend-swatch-high"></span>
+                        High
+                    </span>
+                </div>
+
+                <!-- Accessible fallback table for screen readers -->
+                <table class="slds-assistive-text" aria-label="Risk trend data">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Critical</th>
+                            <th scope="col">High</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={trendData} for:item="row">
+                            <tr key={row.date}>
+                                <th scope="row">{row.date}</th>
+                                <td>{row.criticalCount}</td>
+                                <td>{row.highCount}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+
+            <template lwc:if={hasError}>
+                <p class="slds-text-color_weak">No data available.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

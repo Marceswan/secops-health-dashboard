@@ -1,0 +1,49 @@
+<template>
+    <lightning-card title="Capability Status" icon-name="standard:health_check">
+        <div slot="actions">
+            <lightning-button
+                label="Re-run probe now"
+                onclick={handleRunProbe}
+                disabled={isRunning}
+                variant="neutral">
+            </lightning-button>
+        </div>
+
+        <div class="slds-var-p-horizontal_medium slds-var-p-bottom_medium">
+            <template if:true={error}>
+                <div class="slds-text-color_error">Failed to read capability snapshot.</div>
+            </template>
+
+            <ul class="slds-list_horizontal slds-has-dividers_right slds-var-m-bottom_small">
+                <li class="slds-item slds-var-p-right_medium">
+                    <lightning-icon icon-name={eventLogFileIcon}
+                                    variant={eventLogFileVariant}
+                                    size="x-small"
+                                    alternative-text="EventLogFile status">
+                    </lightning-icon>
+                    <span class="slds-var-p-left_x-small">Event Log File</span>
+                </li>
+                <li class="slds-item slds-var-p-right_medium">
+                    <lightning-icon icon-name={rtemIcon}
+                                    variant={rtemVariant}
+                                    size="x-small"
+                                    alternative-text="RTEM status">
+                    </lightning-icon>
+                    <span class="slds-var-p-left_x-small">Real-Time Event Monitoring</span>
+                </li>
+                <li class="slds-item">
+                    <lightning-icon icon-name={tspIcon}
+                                    variant={tspVariant}
+                                    size="x-small"
+                                    alternative-text="TSP status">
+                    </lightning-icon>
+                    <span class="slds-var-p-left_x-small">Transaction Security Policies</span>
+                </li>
+            </ul>
+
+            <p class="slds-text-body_small slds-text-color_weak">
+                Last probed: {lastProbedLabel}
+            </p>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,15 @@
+<template>
+    <lightning-modal-header label={headline}></lightning-modal-header>
+    <lightning-modal-body>
+        <p>{body}</p>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" variant="neutral" onclick={handleCancel}></lightning-button>
+        <lightning-button
+            label={actionLabel}
+            variant="destructive"
+            onclick={handleConfirm}
+            class="slds-m-left_x-small"
+        ></lightning-button>
+    </lightning-modal-footer>
+</template>

@@ -1,0 +1,49 @@
+:host {
+    display: block;
+}
+
+.timeline-row {
+    display: flex;
+    align-items: flex-start;
+    padding: var(--slds-g-spacing-2) 0;
+    border-bottom: 1px solid var(--slds-g-color-border-base-1);
+}
+
+.timeline-row:last-child {
+    border-bottom: none;
+}
+
+.timeline-body {
+    margin-left: var(--slds-g-spacing-3);
+    flex: 1;
+}
+
+.timeline-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--slds-g-spacing-1);
+}
+
+.dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    margin-top: var(--slds-g-spacing-1);
+    flex-shrink: 0;
+}
+
+.dot-critical {
+    background-color: var(--slds-g-color-error-base-50);
+}
+
+.dot-high {
+    background-color: var(--slds-g-color-error-base-50);
+}
+
+.dot-medium {
+    background-color: var(--slds-g-color-warning-base-50);
+}
+
+.dot-low {
+    background-color: var(--slds-g-color-success-base-50);
+}

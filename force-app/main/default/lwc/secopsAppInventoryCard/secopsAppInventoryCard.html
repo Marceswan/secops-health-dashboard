@@ -1,0 +1,36 @@
+<template>
+    <lightning-card title="OAuth App Inventory" icon-name="utility:apps">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <template lwc:if={hasError}>
+                <p class="slds-text-color_error">Unable to load app inventory summary.</p>
+            </template>
+
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                    <div class="tile">
+                        <div class="tile-num">{totalApps}</div>
+                        <div class="tile-label">Total Apps</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                    <div class="tile">
+                        <div class="tile-num">{newIn30Days}</div>
+                        <div class="tile-label">New (30d)</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                    <div class="tile">
+                        <div class="tile-num">{broadScopeCount}</div>
+                        <div class="tile-label">Broad Scope</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-2 slds-large-size_1-of-4">
+                    <div class="tile">
+                        <div class="tile-num">{staleCount}</div>
+                        <div class="tile-label">Stale</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>

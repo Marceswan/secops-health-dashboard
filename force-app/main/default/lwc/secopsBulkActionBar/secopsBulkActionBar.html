@@ -1,0 +1,47 @@
+<template>
+    <template lwc:if={hasSelection}>
+        <div class="slds-box slds-box_x-small slds-theme_shade slds-grid slds-grid_vertical-align-center slds-wrap">
+            <span class="slds-text-body_small slds-p-right_small">{count} selected</span>
+            <lightning-button
+                label={acknowledgeLabel}
+                variant="neutral"
+                onclick={handleAcknowledge}
+                disabled={disabled}
+                class="slds-m-right_x-small">
+            </lightning-button>
+            <lightning-button
+                label={dismissLabel}
+                variant="destructive-text"
+                onclick={openDismissModal}
+                disabled={disabled}>
+            </lightning-button>
+        </div>
+    </template>
+
+    <template lwc:if={showDismissModal}>
+        <section role="dialog" tabindex="-1" aria-labelledby="bulk-dismiss-title" aria-modal="true" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeDismissModal}>
+                        <lightning-icon icon-name="utility:close" size="small" variant="inverse" alternative-text="Close"></lightning-icon>
+                    </button>
+                    <h2 id="bulk-dismiss-title" class="slds-modal__title slds-hyphenate">Dismiss {count} Finding(s)</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-input
+                        type="text"
+                        label="Reason for dismissal"
+                        value={dismissReason}
+                        onchange={handleReasonChange}
+                        required>
+                    </lightning-input>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={closeDismissModal} class="slds-m-right_x-small"></lightning-button>
+                    <lightning-button label="Dismiss" variant="destructive" onclick={handleDismissConfirm} disabled={busy}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

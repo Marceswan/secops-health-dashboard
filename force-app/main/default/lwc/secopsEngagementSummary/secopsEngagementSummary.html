@@ -1,0 +1,23 @@
+<template>
+    <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+        <h2 class="slds-text-heading_medium">SecOps Engagement Summary</h2>
+        <lightning-button
+            label="Download PDF"
+            icon-name="utility:download"
+            variant="brand"
+            onclick={handleDownloadPdf}
+        ></lightning-button>
+    </div>
+
+    <div class="slds-m-bottom_small">
+        <c-secops-risk-trend></c-secops-risk-trend>
+    </div>
+
+    <div class="slds-m-bottom_small">
+        <c-secops-app-inventory-card></c-secops-app-inventory-card>
+    </div>
+
+    <div class="slds-m-bottom_small">
+        <c-secops-top-risks></c-secops-top-risks>
+    </div>
+</template>

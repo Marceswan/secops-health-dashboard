@@ -1,0 +1,56 @@
+<template>
+    <lightning-card title="Continuous Schedule" icon-name="standard:scheduling_workspace">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template if:true={error}>
+                <div class="slds-text-color_error">Failed to load schedule configuration.</div>
+            </template>
+
+            <lightning-input
+                type="toggle"
+                label="Enabled"
+                checked={enabled}
+                onchange={handleEnabledChange}
+                message-toggle-active="Continuous scans on"
+                message-toggle-inactive="Continuous scans off"
+                class="slds-m-bottom_small">
+            </lightning-input>
+
+            <lightning-input
+                type="number"
+                label="Cadence (hours)"
+                min="1"
+                max="24"
+                step="1"
+                value={cadenceHours}
+                onchange={handleCadenceChange}
+                class="slds-m-bottom_small">
+            </lightning-input>
+
+            <lightning-combobox
+                label="Baseline refresh day"
+                value={baselineRefreshDay}
+                options={dayOptions}
+                onchange={handleDayChange}
+                class="slds-m-bottom_small">
+            </lightning-combobox>
+
+            <lightning-input
+                type="number"
+                label="Baseline refresh hour (0-23)"
+                min="0"
+                max="23"
+                step="1"
+                value={baselineRefreshHour}
+                onchange={handleHourChange}
+                class="slds-m-bottom_medium">
+            </lightning-input>
+
+            <lightning-button
+                label="Save"
+                variant="brand"
+                onclick={handleSave}
+                disabled={isSaving}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>

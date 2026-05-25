@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Category__c</fullName>
+    <label>Category</label>
+    <required>true</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Login Anomaly</fullName>
+                <default>false</default>
+                <label>Login Anomaly</label>
+            </value>
+            <value>
+                <fullName>OAuth Risk</fullName>
+                <default>false</default>
+                <label>OAuth Risk</label>
+            </value>
+            <value>
+                <fullName>ConnectedApp Drift</fullName>
+                <default>false</default>
+                <label>ConnectedApp Drift</label>
+            </value>
+            <value>
+                <fullName>Privilege Escalation</fullName>
+                <default>false</default>
+                <label>Privilege Escalation</label>
+            </value>
+            <value>
+                <fullName>Setup Change</fullName>
+                <default>false</default>
+                <label>Setup Change</label>
+            </value>
+            <value>
+                <fullName>Baseline Deviation</fullName>
+                <default>false</default>
+                <label>Baseline Deviation</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

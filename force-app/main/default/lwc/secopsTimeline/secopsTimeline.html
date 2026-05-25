@@ -1,0 +1,42 @@
+<template>
+    <lightning-card title="User Activity Timeline" icon-name="standard:event">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <lightning-combobox
+                label="User"
+                placeholder="Select a user"
+                options={userOptions}
+                value={selectedUserId}
+                onchange={handleUserChange}>
+            </lightning-combobox>
+
+            <template lwc:if={loadError}>
+                <p class="slds-text-color_error slds-p-top_small">{loadError}</p>
+            </template>
+
+            <template lwc:if={hasEntries}>
+                <ul class="slds-timeline slds-p-top_medium">
+                    <template for:each={displayEntries} for:item="e">
+                        <li key={e.ts} class="timeline-row">
+                            <span class={e.dotClass}></span>
+                            <div class="timeline-body">
+                                <div class="timeline-meta">
+                                    <span class="slds-text-title_caps">{e.entryType}</span>
+                                    <span class="slds-text-body_small slds-text-color_weak">{e.tsFormatted}</span>
+                                </div>
+                                <div class="slds-text-body_regular">{e.label}</div>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+
+            <template lwc:elseif={hasSelection}>
+                <p class="slds-text-color_weak slds-p-top_medium">No timeline activity in the selected window.</p>
+            </template>
+
+            <template lwc:else>
+                <p class="slds-text-color_weak slds-p-top_medium">Select a user to view activity.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

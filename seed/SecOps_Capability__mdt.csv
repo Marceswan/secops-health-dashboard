@@ -1,0 +1,2 @@
+DeveloperName,Label,Protected,EventLogFile_Available__c,RealTimeEventMonitoring_Available__c,TransactionSecurity_Available__c
+Current,Current,false,false,false,false

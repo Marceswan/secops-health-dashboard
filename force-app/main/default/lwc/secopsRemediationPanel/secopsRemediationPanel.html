@@ -1,0 +1,54 @@
+<template>
+    <template lwc:if={hasAnyAction}>
+        <div class="slds-box slds-box_x-small slds-m-top_medium">
+            <p class="slds-text-title_caps slds-m-bottom_x-small">Destructive Remediation</p>
+            <div class="slds-grid slds-wrap slds-gutters_x-small">
+                <template lwc:if={canRemediateApp}>
+                    <lightning-button
+                        label="Revoke OAuth Token"
+                        variant="destructive-text"
+                        onclick={handleRevokeToken}
+                        disabled={busy}
+                        class="slds-m-right_x-small slds-m-bottom_x-small"
+                    ></lightning-button>
+                </template>
+                <template lwc:if={canRemediateApp}>
+                    <lightning-button
+                        label="Block Connected App"
+                        variant="destructive-text"
+                        onclick={handleBlockApp}
+                        disabled={busy}
+                        class="slds-m-right_x-small slds-m-bottom_x-small"
+                    ></lightning-button>
+                </template>
+                <template lwc:if={canRemediateUser}>
+                    <lightning-button
+                        label="Kill Session"
+                        variant="destructive-text"
+                        onclick={handleKillSession}
+                        disabled={busy}
+                        class="slds-m-right_x-small slds-m-bottom_x-small"
+                    ></lightning-button>
+                </template>
+                <template lwc:if={canRemediateUser}>
+                    <lightning-button
+                        label="Freeze User"
+                        variant="destructive-text"
+                        onclick={handleFreezeUser}
+                        disabled={busy}
+                        class="slds-m-right_x-small slds-m-bottom_x-small"
+                    ></lightning-button>
+                </template>
+                <template lwc:if={canRemediateUser}>
+                    <lightning-button
+                        label="Force Password Reset"
+                        variant="destructive-text"
+                        onclick={handleForceReset}
+                        disabled={busy}
+                        class="slds-m-right_x-small slds-m-bottom_x-small"
+                    ></lightning-button>
+                </template>
+            </div>
+        </div>
+    </template>
+</template>

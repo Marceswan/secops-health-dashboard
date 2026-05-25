@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <label>Bulk API From New Client</label>
+    <protected>false</protected>
+    <values>
+        <field>Apex_Class__c</field>
+        <value xsi:type="xsd:string">Rule_BulkApiFromNewClient</value>
+    </values>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">OAuth Risk</value>
+    </values>
+    <values>
+        <field>Default_Risk_Score__c</field>
+        <value xsi:type="xsd:double">75.0</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">Flags Bulk API jobs initiated by a user from a client name (or source) that user has never used in the prior thirty days. A new Bulk API client on a previously-quiet user is a strong indicator of credential theft, unauthorized integration deployment, or a rogue developer side-loading a new tool.</value>
+    </values>
+    <values>
+        <field>Is_Active__c</field>
+        <value xsi:type="xsd:boolean">true</value>
+    </values>
+    <values>
+        <field>Remediation_Guidance__c</field>
+        <value xsi:type="xsd:string">Identify the new client name and confirm whether the user authorized a new integration. If unexpected, revoke the user's OAuth tokens, freeze active sessions, and inspect Bulk API job results for what data was extracted. If legitimate, document the new client in the user's integration baseline so future runs do not re-fire.</value>
+    </values>
+    <values>
+        <field>Required_Capability__c</field>
+        <value xsi:type="xsd:string">EventLogFile</value>
+    </values>
+    <values>
+        <field>Run_Frequency__c</field>
+        <value xsi:type="xsd:string">Every Run</value>
+    </values>
+    <values>
+        <field>Severity__c</field>
+        <value xsi:type="xsd:string">High</value>
+    </values>
+</CustomMetadata>

@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title="Cross-User Findings (Last 30 Days)" icon-name="standard:people">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <template lwc:if={hasRows}>
+                <lightning-datatable
+                    key-field="userId"
+                    data={rows}
+                    columns={columns}
+                    onrowaction={handleRowAction}
+                    hide-checkbox-column>
+                </lightning-datatable>
+            </template>
+            <template lwc:elseif={loadError}>
+                <p class="slds-text-color_error">Unable to load heatmap.</p>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-color_weak">No findings in the last 30 days.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

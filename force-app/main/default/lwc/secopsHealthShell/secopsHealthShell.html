@@ -1,0 +1,69 @@
+<template>
+    <lightning-card title="SecOps Health" icon-name="standard:service_appointment">
+        <div class="slds-var-p-around_medium secops-shell">
+            <lightning-tabset
+                variant="scoped"
+                active-tab-value={activeTab}
+                onactive={handleTabActive}
+            >
+                <!-- ===== Triage ===== -->
+                <lightning-tab label="Triage" value="triage" icon-name="utility:priority">
+                    <div class="slds-var-p-around_small">
+                        <div class="slds-grid slds-grid_vertical slds-gutters_direct">
+                            <div class="slds-col slds-var-m-bottom_small">
+                                <c-secops-scan-run-banner></c-secops-scan-run-banner>
+                            </div>
+                            <div class="slds-col">
+                                <c-secops-finding-queue></c-secops-finding-queue>
+                            </div>
+                        </div>
+                    </div>
+                </lightning-tab>
+
+                <!-- ===== Investigate ===== -->
+                <lightning-tab label="Investigate" value="investigate" icon-name="utility:search">
+                    <div class="slds-var-p-around_small">
+                        <div class="slds-grid slds-grid_vertical slds-gutters_direct">
+                            <div class="slds-col slds-var-m-bottom_small">
+                                <c-secops-timeline></c-secops-timeline>
+                            </div>
+                            <div class="slds-col slds-var-m-bottom_small">
+                                <c-secops-cross-user></c-secops-cross-user>
+                            </div>
+                            <div class="slds-col">
+                                <c-secops-export-bar></c-secops-export-bar>
+                            </div>
+                        </div>
+                    </div>
+                </lightning-tab>
+
+                <!-- ===== Posture ===== -->
+                <lightning-tab label="Posture" value="posture" icon-name="utility:shield">
+                    <div class="slds-var-p-around_small">
+                        <c-secops-engagement-summary></c-secops-engagement-summary>
+                    </div>
+                </lightning-tab>
+
+                <!-- ===== Configure ===== -->
+                <lightning-tab label="Configure" value="configure" icon-name="utility:settings">
+                    <div class="slds-var-p-around_small">
+                        <div class="slds-grid slds-grid_vertical slds-gutters_direct">
+                            <div class="slds-col slds-var-m-bottom_small">
+                                <c-secops-capability-status></c-secops-capability-status>
+                            </div>
+                            <div class="slds-col slds-var-m-bottom_small">
+                                <c-secops-rule-catalog></c-secops-rule-catalog>
+                            </div>
+                            <div class="slds-col slds-var-m-bottom_small">
+                                <c-secops-schedule-control></c-secops-schedule-control>
+                            </div>
+                            <div class="slds-col">
+                                <c-secops-baseline-health></c-secops-baseline-health>
+                            </div>
+                        </div>
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+</template>

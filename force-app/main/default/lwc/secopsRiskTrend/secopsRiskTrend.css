@@ -1,0 +1,32 @@
+.legend-swatch {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-right: var(--slds-g-spacing-1);
+    vertical-align: middle;
+    border-radius: var(--slds-g-radius-border-1);
+}
+
+.legend-swatch-critical {
+    background: var(--slds-g-color-error-base-50);
+}
+
+.legend-swatch-high {
+    background: var(--slds-g-color-warning-base-50);
+}
+
+.risk-trend-chart .grid-line {
+    stroke: var(--slds-g-color-border-base-1);
+}
+
+.risk-trend-chart .axis-label {
+    fill: var(--slds-g-color-on-surface-2);
+}
+
+.risk-trend-chart .series-critical {
+    stroke: var(--slds-g-color-error-base-50);
+}
+
+.risk-trend-chart .series-high {
+    stroke: var(--slds-g-color-warning-base-50);
+}

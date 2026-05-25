@@ -1,0 +1,41 @@
+<template>
+    <lightning-card title="Last Scan" icon-name="standard:event">
+        <div slot="actions">
+            <lightning-button
+                label="Run Scan Now"
+                variant="brand"
+                onclick={handleStartScan}
+                disabled={startButtonDisabled}>
+            </lightning-button>
+        </div>
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <template lwc:if={loading}>
+                <lightning-spinner alternative-text="Loading scan status" size="small"></lightning-spinner>
+            </template>
+            <template lwc:else>
+                <template lwc:if={hasRun}>
+                    <div class="slds-grid slds-grid_vertical-align-center slds-wrap">
+                        <lightning-badge label={statusLabel} variant={statusVariant} class="slds-m-right_small"></lightning-badge>
+                        <template lwc:if={isRunning}>
+                            <lightning-spinner alternative-text="Scan running" size="small" variant="brand"></lightning-spinner>
+                        </template>
+                    </div>
+                    <p class="slds-text-body_regular slds-p-top_x-small">{summaryLine}</p>
+                    <template lwc:if={startedLabel}>
+                        <p class="slds-text-body_small slds-text-color_weak">
+                            Started: <lightning-formatted-date-time value={startedLabel} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                        </p>
+                    </template>
+                    <template lwc:if={completedLabel}>
+                        <p class="slds-text-body_small slds-text-color_weak">
+                            Completed: <lightning-formatted-date-time value={completedLabel} year="numeric" month="short" day="2-digit" hour="2-digit" minute="2-digit"></lightning-formatted-date-time>
+                        </p>
+                    </template>
+                </template>
+                <template lwc:else>
+                    <p class="slds-text-color_weak">{summaryLine}</p>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+</template>

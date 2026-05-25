@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Composite_Key__c</fullName>
+    <description>Composite idempotency key. TODO: formulas cannot reference Long Text Area fields, so Source_Json__c is excluded here. For true idempotency, materialize a hash of Source_Json__c in Apex on insert and store in this field as a real Text column.</description>
+    <formula>TEXT(Event_Type__c) &amp; &quot;|&quot; &amp; TEXT(Event_Time__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Composite Key</label>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

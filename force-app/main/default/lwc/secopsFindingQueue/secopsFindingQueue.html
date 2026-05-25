@@ -1,0 +1,37 @@
+<template>
+    <lightning-card title="Open Security Findings" icon-name="standard:incident">
+        <div slot="actions">
+            <lightning-button
+                label="Run Scan Now"
+                variant="brand"
+                onclick={handleRunScan}
+                disabled={isScanning}>
+            </lightning-button>
+        </div>
+        <div class="slds-p-horizontal_medium">
+            <template lwc:if={hasSelection}>
+                <div class="slds-m-bottom_small">
+                    <c-secops-bulk-action-bar
+                        selected-ids={selectedIds}
+                        onbulkactionapplied={handleBulkRefresh}>
+                    </c-secops-bulk-action-bar>
+                </div>
+            </template>
+            <template lwc:if={hasData}>
+                <lightning-datatable
+                    key-field="id"
+                    data={findingsData}
+                    columns={columns}
+                    onrowaction={handleRowAction}
+                    onrowselection={handleRowSelection}>
+                </lightning-datatable>
+            </template>
+            <template lwc:elseif={findingsError}>
+                <p class="slds-text-color_error slds-p-around_medium">Unable to load findings.</p>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-color_weak slds-p-around_medium">No open findings.</p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

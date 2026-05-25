@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Allows execution of user-targeted destructive remediation actions (deactivate, reset password, freeze, revoke sessions).</description>
+    <isLicensed>false</isLicensed>
+    <label>SecOps Remediate User</label>
+</CustomPermission>

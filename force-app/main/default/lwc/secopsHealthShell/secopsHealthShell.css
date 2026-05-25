@@ -1,0 +1,7 @@
+:host {
+    display: block;
+}
+
+.secops-shell {
+    background-color: var(--slds-g-color-surface-1);
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Bundles SecOps Read, Investigate, and Configure for the full security operations team.</description>
+    <label>SecOps Full Team Access</label>
+    <permissionSets>SecOps_Read</permissionSets>
+    <permissionSets>SecOps_Investigate</permissionSets>
+    <permissionSets>SecOps_Configure</permissionSets>
+</PermissionSetGroup>

@@ -1,0 +1,20 @@
+<template>
+    <lightning-card title="Export and Reports" icon-name="standard:report">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <lightning-button
+                label="Export to CSV"
+                variant="neutral"
+                icon-name="utility:download"
+                onclick={handleExportCsv}
+                disabled={busy}
+                class="slds-m-right_small">
+            </lightning-button>
+            <lightning-button
+                label="Open in Report"
+                variant="brand"
+                icon-name="utility:open"
+                onclick={handleOpenReport}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>

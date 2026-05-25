@@ -1,0 +1,57 @@
+<template>
+    <lightning-card title="Top Risks" icon-name="utility:warning">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small">
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">Top 10 Users</h3>
+                    <template lwc:if={hasUsers}>
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">User</th>
+                                    <th scope="col" class="slds-text-align_right">Findings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={users} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.name}</td>
+                                        <td class="slds-text-align_right">{row.findingCount}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template lwc:else>
+                        <p class="slds-text-color_weak">No user findings yet.</p>
+                    </template>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">Top 10 Apps</h3>
+                    <template lwc:if={hasApps}>
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col">App</th>
+                                    <th scope="col" class="slds-text-align_right">Findings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={apps} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.name}</td>
+                                        <td class="slds-text-align_right">{row.findingCount}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template lwc:else>
+                        <p class="slds-text-color_weak">No app findings yet.</p>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>
