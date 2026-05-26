@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Finding_Number__c</fullName>
-    <description>Original Security_Finding__c Name (e.g. FND-0000123).</description>
-    <label>Finding Number</label>
-    <length>40</length>
-    <type>Text</type>
-</CustomField>
