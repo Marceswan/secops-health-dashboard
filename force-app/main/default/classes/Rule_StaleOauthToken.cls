@@ -16,20 +16,50 @@ public with sharing class Rule_StaleOauthToken implements DetectionRule {
     }
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         Datetime cutoff = Datetime.now().addDays(-STALE_DAYS);
 
-        for (OauthToken tok : [
+        List<OauthToken> tokens = [
             SELECT Id, UserId, AppName, AppMenuItem.ApplicationId, LastUsedDate, CreatedDate
             FROM OauthToken
             WHERE LastUsedDate != NULL AND LastUsedDate < :cutoff
             LIMIT 5000
+        ];
+
+        // Build the ConnectedApp_Id__c -> inventory Id lookup once, matching the
+        // per-token resolution the rule previously did via per-row SOQL.
+        Map<String, Id> appInventoryByConnectedAppId = new Map<String, Id>();
+        for (OAuth_App_Inventory__c app : [
+            SELECT Id, ConnectedApp_Id__c
+            FROM OAuth_App_Inventory__c
+            WHERE ConnectedApp_Id__c != NULL
+            LIMIT 50000
         ]) {
+            appInventoryByConnectedAppId.put(app.ConnectedApp_Id__c, app.Id);
+        }
+
+        return evaluateRows(ctx, tokens, appInventoryByConnectedAppId);
+    }
+
+    /**
+     * Build a finding per stale token. Separated from the SOQL so tests can pass
+     * read-only OauthToken rows (the object is not insertable) plus a pre-built
+     * ConnectedApp_Id__c -> OAuth_App_Inventory__c Id map for Subject_App__c.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(
+        DetectionContext ctx,
+        List<OauthToken> tokens,
+        Map<String, Id> appInventoryByConnectedAppId
+    ) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (OauthToken tok : tokens) {
             String applicationId = tok.AppMenuItem == null ? null : tok.AppMenuItem.ApplicationId;
-            Id subjectAppId = resolveAppInventoryId(applicationId);
+            Id subjectAppId = String.isBlank(applicationId)
+                ? null
+                : appInventoryByConnectedAppId.get(applicationId);
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'Stale_OAuth_Token',
                 'OAuth Risk',
                 SecOpsConstants.SEVERITY_LOW,
                 tok.UserId,
@@ -48,24 +78,5 @@ public with sharing class Rule_StaleOauthToken implements DetectionRule {
             findings.add(f);
         }
         return findings;
-    }
-
-    /**
-     * Look up the OAuth_App_Inventory__c Id for a given ConnectedApp ApplicationId.
-     * Returns null when the application is not catalogued (Subject_App__c stays empty).
-     */
-    private static Id resolveAppInventoryId(String applicationId) {
-        if (String.isBlank(applicationId)) {
-            return null;
-        }
-        for (OAuth_App_Inventory__c app : [
-            SELECT Id
-            FROM OAuth_App_Inventory__c
-            WHERE ConnectedApp_Id__c = :applicationId
-            LIMIT 1
-        ]) {
-            return app.Id;
-        }
-        return null;
     }
 }

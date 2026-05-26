@@ -40,6 +40,26 @@ public with sharing class SetupAuditIngest extends IngestBase {
             return;
         }
 
+        List<Security_Event__c> events = buildEvents(rows);
+
+        Database.SaveResult[] results = Database.insert(events, false);
+        Integer inserted = 0;
+        for (Database.SaveResult sr : results) {
+            if (sr.isSuccess()) {
+                inserted++;
+            }
+        }
+        ScanRunService.appendLog(scanRunId, 'SetupAuditIngest: inserted ' + inserted + ' SetupAuditTrail events');
+    }
+
+    /**
+     * Transform queried SetupAuditTrail rows into Security_Event__c records.
+     * Extracted from ingest() so it can be unit tested with in-memory
+     * SetupAuditTrail rows (a read-only platform object that cannot be inserted
+     * in tests). Behavior is identical to the inline logic.
+     */
+    @TestVisible
+    private static List<Security_Event__c> buildEvents(List<SetupAuditTrail> rows) {
         List<Security_Event__c> events = new List<Security_Event__c>();
         for (SetupAuditTrail row : rows) {
             events.add(
@@ -51,14 +71,6 @@ public with sharing class SetupAuditIngest extends IngestBase {
                 )
             );
         }
-
-        Database.SaveResult[] results = Database.insert(events, false);
-        Integer inserted = 0;
-        for (Database.SaveResult sr : results) {
-            if (sr.isSuccess()) {
-                inserted++;
-            }
-        }
-        ScanRunService.appendLog(scanRunId, 'SetupAuditIngest: inserted ' + inserted + ' SetupAuditTrail events');
+        return events;
     }
 }

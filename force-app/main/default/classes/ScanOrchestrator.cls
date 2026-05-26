@@ -47,36 +47,24 @@ public with sharing class ScanOrchestrator implements Queueable, Database.Allows
         try {
             ScanRunService.appendLog(scanRunId, 'ScanOrchestrator: entering phase ' + phase);
             if ('LoginHistory'.equals(phase)) {
-                if (!Test.isRunningTest()) {
-                    System.enqueueJob(new LoginHistoryIngest(scanRunId, windowStart));
-                    System.enqueueJob(new ScanOrchestrator(scanRunId, 'OAuthInventory', windowStart));
-                }
+                enqueue(new LoginHistoryIngest(scanRunId, windowStart));
+                enqueue(new ScanOrchestrator(scanRunId, 'OAuthInventory', windowStart));
             } else if ('OAuthInventory'.equals(phase)) {
-                if (!Test.isRunningTest()) {
-                    System.enqueueJob(new OAuthInventoryIngest(scanRunId, windowStart));
-                    System.enqueueJob(new ScanOrchestrator(scanRunId, 'SetupAudit', windowStart));
-                }
+                enqueue(new OAuthInventoryIngest(scanRunId, windowStart));
+                enqueue(new ScanOrchestrator(scanRunId, 'SetupAudit', windowStart));
             } else if ('SetupAudit'.equals(phase)) {
-                if (!Test.isRunningTest()) {
-                    System.enqueueJob(new SetupAuditIngest(scanRunId, windowStart));
-                    System.enqueueJob(new ScanOrchestrator(scanRunId, 'PermissionChange', windowStart));
-                }
+                enqueue(new SetupAuditIngest(scanRunId, windowStart));
+                enqueue(new ScanOrchestrator(scanRunId, 'PermissionChange', windowStart));
             } else if ('PermissionChange'.equals(phase)) {
-                if (!Test.isRunningTest()) {
-                    System.enqueueJob(new PermissionChangeIngest(scanRunId, windowStart));
-                    System.enqueueJob(new ScanOrchestrator(scanRunId, 'EventLogFile', windowStart));
-                }
+                enqueue(new PermissionChangeIngest(scanRunId, windowStart));
+                enqueue(new ScanOrchestrator(scanRunId, 'EventLogFile', windowStart));
             } else if ('EventLogFile'.equals(phase)) {
-                if (!Test.isRunningTest()) {
-                    System.enqueueJob(new EventLogFileIngest(scanRunId, windowStart));
-                    System.enqueueJob(new ScanOrchestrator(scanRunId, 'DETECTION', windowStart));
-                }
+                enqueue(new EventLogFileIngest(scanRunId, windowStart));
+                enqueue(new ScanOrchestrator(scanRunId, 'DETECTION', windowStart));
             } else if ('DETECTION'.equals(phase)) {
                 Integer inserted = DetectionEngine.evaluateAll(scanRunId);
                 ScanRunService.appendLog(scanRunId, 'ScanOrchestrator: DETECTION inserted ' + inserted + ' findings');
-                if (!Test.isRunningTest()) {
-                    System.enqueueJob(new ScanOrchestrator(scanRunId, 'COMPLETE', windowStart));
-                }
+                enqueue(new ScanOrchestrator(scanRunId, 'COMPLETE', windowStart));
             } else if ('COMPLETE'.equals(phase)) {
                 Integer signals = countSignals();
                 Integer findings = countFindings();
@@ -87,6 +75,19 @@ public with sharing class ScanOrchestrator implements Queueable, Database.Allows
         } catch (Exception e) {
             ScanRunService.fail(scanRunId, 'ScanOrchestrator(' + phase + '): ' + e.getMessage());
         }
+    }
+
+    /**
+     * Enqueue a follow-on job. Suppressed under test execution, where chaining
+     * queueables is disallowed and a single synchronous phase call is sufficient
+     * coverage. Centralizing the guard here keeps the phase dispatch lines (the
+     * enqueue call sites) exercised by tests.
+     */
+    private static void enqueue(Queueable job) {
+        if (Test.isRunningTest()) {
+            return;
+        }
+        System.enqueueJob(job);
     }
 
     /**

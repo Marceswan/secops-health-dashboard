@@ -91,16 +91,34 @@ public with sharing class LoginHistoryIngest extends IngestBase {
             return;
         }
 
-        Datetime newWatermark = rows[rows.size() - 1].LoginTime;
-        ScanRunService.appendLog(
-            scanRunId,
-            'LoginHistoryIngest: chunk ' + chunkIndex + ' surveyed ' + rows.size() + ' rows'
-        );
+        Datetime newWatermark = watermarkOf(rows);
+        ScanRunService.appendLog(scanRunId, buildSurveyLog(chunkIndex, rows));
 
         if (!Test.isRunningTest() && rows.size() == chunkSize) {
             System.enqueueJob(
                 new LoginHistoryIngest(scanRunId, chunkIndex + 1, chunkSize, newWatermark, windowStartOverride)
             );
         }
+    }
+
+    /**
+     * Compute the chunk watermark (LoginTime of the last surveyed row) used as
+     * the cursor for the next chunk. Extracted from ingest() so it can be unit
+     * tested with in-memory LoginHistory rows (a read-only platform object that
+     * cannot be inserted in tests). Behavior is identical to the inline logic.
+     */
+    @TestVisible
+    private static Datetime watermarkOf(List<LoginHistory> rows) {
+        return rows[rows.size() - 1].LoginTime;
+    }
+
+    /**
+     * Build the per-chunk survey log line. Extracted alongside watermarkOf so
+     * the row-derived outputs of ingest() are unit testable without inserting
+     * read-only LoginHistory rows. Behavior is identical to the inline logic.
+     */
+    @TestVisible
+    private static String buildSurveyLog(Integer chunkIndex, List<LoginHistory> rows) {
+        return 'LoginHistoryIngest: chunk ' + chunkIndex + ' surveyed ' + rows.size() + ' rows';
     }
 }

@@ -1,5 +1,4 @@
-import { LightningElement, wire, track } from 'lwc';
-import listActiveUsers from '@salesforce/apex/InvestigateController.listActiveUsers';
+import { LightningElement, track } from 'lwc';
 import getTimelineForUser from '@salesforce/apex/InvestigateController.getTimelineForUser';
 
 const DEFAULT_DAYS = 30;
@@ -16,15 +15,19 @@ export default class SecopsTimeline extends LightningElement {
     @track loadError;
     days = DEFAULT_DAYS;
 
-    @wire(listActiveUsers, { limitSize: 100 })
-    wiredUsers;
-
-    get userOptions() {
-        if (!this.wiredUsers || !this.wiredUsers.data) {
-            return [];
-        }
-        return this.wiredUsers.data.map((u) => ({ label: u.Name, value: u.Id }));
-    }
+    // lightning-record-picker config: search Name + Username, show Name with
+    // Username as secondary, restrict to active users only.
+    matchingInfo = {
+        primaryField: { fieldPath: 'Name' },
+        additionalFields: [{ fieldPath: 'Username' }]
+    };
+    displayInfo = {
+        primaryField: 'Name',
+        additionalFields: ['Username']
+    };
+    userFilter = {
+        criteria: [{ fieldPath: 'IsActive', operator: 'eq', value: true }]
+    };
 
     get hasEntries() {
         return this.entries && this.entries.length > 0;
@@ -43,7 +46,9 @@ export default class SecopsTimeline extends LightningElement {
     }
 
     handleUserChange(event) {
-        this.selectedUserId = event.detail.value;
+        // lightning-record-picker emits the picked record id on event.detail.recordId
+        // (null when cleared); lightning-combobox emitted event.detail.value.
+        this.selectedUserId = event.detail.recordId || undefined;
         this.loadTimeline();
     }
 

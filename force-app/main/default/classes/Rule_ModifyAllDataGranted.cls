@@ -13,10 +13,9 @@ public with sharing class Rule_ModifyAllDataGranted implements DetectionRule {
     }
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         Datetime cutoff = Datetime.now().addHours(-24);
 
-        for (PermissionSetAssignment psa : [
+        List<PermissionSetAssignment> rows = [
             SELECT
                 AssigneeId,
                 PermissionSetId,
@@ -30,11 +29,23 @@ public with sharing class Rule_ModifyAllDataGranted implements DetectionRule {
                 AND (PermissionSet.PermissionsModifyAllData = TRUE
                 OR PermissionSet.PermissionsViewAllData = TRUE)
             LIMIT 5000
-        ]) {
+        ];
+        return evaluateRows(ctx, rows);
+    }
+
+    /**
+     * Build a finding per privileged assignment. Separated from the SOQL so tests
+     * can pass in-memory PermissionSetAssignment rows; the production filter lives
+     * in evaluate()'s query.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(DetectionContext ctx, List<PermissionSetAssignment> rows) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (PermissionSetAssignment psa : rows) {
             findings.add(
                 FindingFactory.build(
                     ctx.scanRunId,
-                    getDeveloperName(),
+                    'ModifyAllData_Granted',
                     'Privilege Escalation',
                     SecOpsConstants.SEVERITY_HIGH,
                     psa.AssigneeId,

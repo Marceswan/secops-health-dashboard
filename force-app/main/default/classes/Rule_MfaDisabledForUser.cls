@@ -14,18 +14,24 @@ public with sharing class Rule_MfaDisabledForUser implements DetectionRule {
     }
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         Datetime cutoff = Datetime.now().addDays(-7);
 
         // SetupAuditTrail.Display is not filterable in SOQL. Pre-filter by
         // CreatedDate and Action (which IS filterable), then match Display
         // patterns in Apex below.
-        for (SetupAuditTrail s : [
+        List<SetupAuditTrail> rows = [
             SELECT Id, Action, Display, CreatedDate, CreatedById
             FROM SetupAuditTrail
             WHERE CreatedDate >= :cutoff
             LIMIT 1000
-        ]) {
+        ];
+        return evaluateRows(ctx, rows);
+    }
+
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(DetectionContext ctx, List<SetupAuditTrail> rows) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (SetupAuditTrail s : rows) {
             String disp = s.Display == null ? '' : s.Display;
             String act = s.Action == null ? '' : s.Action;
             Boolean matches =
@@ -38,7 +44,7 @@ public with sharing class Rule_MfaDisabledForUser implements DetectionRule {
             findings.add(
                 FindingFactory.build(
                     ctx.scanRunId,
-                    getDeveloperName(),
+                    'MFA_Disabled_For_User',
                     'Setup Change',
                     SecOpsConstants.SEVERITY_HIGH,
                     s.CreatedById,

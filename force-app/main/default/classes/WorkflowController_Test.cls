@@ -1,5 +1,16 @@
 @IsTest
 private class WorkflowController_Test {
+    // WorkflowController.transitionMany queries findings WITH SECURITY_ENFORCED and
+    // updates them; assignTo posts a FeedItem. The SecOps_Investigate permission set
+    // grants the FLS, Action_Audit create, and view/modify-all needed to triage
+    // findings the user does not own. FLS/perm-set effects do not apply to the
+    // current user within a test, so create a separate empowered user in setup and
+    // run the controller actions via System.runAs(...).
+    @TestSetup
+    static void makeData() {
+        TestDataFactory.empoweredUser();
+    }
+
     /**
      * Insert a finding under a fresh scan run. Helper keeps tests concise.
      */
@@ -22,9 +33,13 @@ private class WorkflowController_Test {
     @IsTest
     static void acknowledge_setsStatusAndAudit() {
         Security_Finding__c f = newFinding();
+        User agent = TestDataFactory.getEmpoweredUser();
 
         Test.startTest();
-        WorkflowController.ActionResult result = WorkflowController.acknowledge(f.Id);
+        WorkflowController.ActionResult result;
+        System.runAs(agent) {
+            result = WorkflowController.acknowledge(f.Id);
+        }
         Test.stopTest();
 
         System.assertNotEquals(null, result, 'Result should not be null');
@@ -45,9 +60,13 @@ private class WorkflowController_Test {
     @IsTest
     static void dismiss_setsStatusReasonAndResolvedAt() {
         Security_Finding__c f = newFinding();
+        User agent = TestDataFactory.getEmpoweredUser();
 
         Test.startTest();
-        WorkflowController.ActionResult result = WorkflowController.dismiss(f.Id, 'False positive');
+        WorkflowController.ActionResult result;
+        System.runAs(agent) {
+            result = WorkflowController.dismiss(f.Id, 'False positive');
+        }
         Test.stopTest();
 
         System.assertEquals(SecOpsConstants.STATUS_DISMISSED, result.status);
@@ -61,7 +80,7 @@ private class WorkflowController_Test {
         System.assertEquals(SecOpsConstants.STATUS_DISMISSED, reloaded.Status__c);
         System.assertEquals('False positive', reloaded.Dismissal_Reason__c);
         System.assertNotEquals(null, reloaded.Resolved_At__c);
-        System.assertEquals(UserInfo.getUserId(), reloaded.Resolved_By__c);
+        System.assertEquals(agent.Id, reloaded.Resolved_By__c, 'Resolver should be the acting SecOps user');
 
         Integer audits = [SELECT COUNT() FROM Action_Audit__c WHERE Finding__c = :f.Id AND Action_Type__c = 'Dismiss'];
         System.assertEquals(1, audits);
@@ -70,9 +89,13 @@ private class WorkflowController_Test {
     @IsTest
     static void markRemediated_setsStatusAndResolvedAt() {
         Security_Finding__c f = newFinding();
+        User agent = TestDataFactory.getEmpoweredUser();
 
         Test.startTest();
-        WorkflowController.ActionResult result = WorkflowController.markRemediated(f.Id);
+        WorkflowController.ActionResult result;
+        System.runAs(agent) {
+            result = WorkflowController.markRemediated(f.Id);
+        }
         Test.stopTest();
 
         System.assertEquals(SecOpsConstants.STATUS_REMEDIATED, result.status);
@@ -117,8 +140,12 @@ private class WorkflowController_Test {
             ids.add(f.Id);
         }
 
+        User agent = TestDataFactory.getEmpoweredUser();
         Test.startTest();
-        List<WorkflowController.ActionResult> results = WorkflowController.acknowledgeBulk(ids);
+        List<WorkflowController.ActionResult> results;
+        System.runAs(agent) {
+            results = WorkflowController.acknowledgeBulk(ids);
+        }
         Test.stopTest();
 
         System.assertEquals(5, results.size());
@@ -154,8 +181,11 @@ private class WorkflowController_Test {
             ids.add(f.Id);
         }
 
+        User agent = TestDataFactory.getEmpoweredUser();
         Test.startTest();
-        WorkflowController.dismissBulk(ids, 'Known benign');
+        System.runAs(agent) {
+            WorkflowController.dismissBulk(ids, 'Known benign');
+        }
         Test.stopTest();
 
         Integer dismissed = [
@@ -169,10 +199,13 @@ private class WorkflowController_Test {
     @IsTest
     static void assignTo_postsFeedItemWithoutChangingOwner() {
         Security_Finding__c f = newFinding();
-        Id me = UserInfo.getUserId();
+        User agent = TestDataFactory.getEmpoweredUser();
 
         Test.startTest();
-        Id feedId = WorkflowController.assignTo(f.Id, me);
+        Id feedId;
+        System.runAs(agent) {
+            feedId = WorkflowController.assignTo(f.Id, agent.Id);
+        }
         Test.stopTest();
 
         System.assertNotEquals(null, feedId, 'assignTo should return a FeedItem Id');

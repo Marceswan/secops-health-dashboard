@@ -27,6 +27,17 @@ public with sharing class PermissionChangeIngest extends IngestBase {
             ? windowStartOverride
             : Datetime.now().addDays(-LOOKBACK_DAYS);
         Integer count = [SELECT COUNT() FROM PermissionSetAssignment WHERE SystemModstamp >= :windowStart];
-        ScanRunService.appendLog(scanRunId, 'PermissionChangeIngest: ' + count + ' assignments in window');
+        ScanRunService.appendLog(scanRunId, buildLog(count));
+    }
+
+    /**
+     * Build the survey log line from the windowed assignment count. Extracted
+     * from ingest() so the count-to-message transformation is unit testable
+     * without depending on org PermissionSetAssignment volume. Behavior is
+     * identical to the inline logic.
+     */
+    @TestVisible
+    private static String buildLog(Integer count) {
+        return 'PermissionChangeIngest: ' + count + ' assignments in window';
     }
 }

@@ -23,13 +23,24 @@ public with sharing class CapabilityProbeController {
      */
     @AuraEnabled(cacheable=true)
     public static CapabilityProbe.ProbeResult readCapability() {
-        CapabilityProbe.ProbeResult result = new CapabilityProbe.ProbeResult();
         List<SecOps_Capability__mdt> rows = [
             SELECT EventLogFile_Available__c, RealTimeEventMonitoring_Available__c, Last_Probed__c
             FROM SecOps_Capability__mdt
             WHERE DeveloperName = :SecOpsConstants.CAPABILITY_DEVELOPER_NAME
             LIMIT 1
         ];
+        return mapCapability(rows);
+    }
+
+    /**
+     * Map the cached capability CMDT row(s) to a ProbeResult. Separated from the
+     * SOQL so it can be tested with an in-memory SecOps_Capability__mdt record
+     * (CMDT rows cannot be created via DML in tests and may be deployed
+     * separately from this code).
+     */
+    @TestVisible
+    private static CapabilityProbe.ProbeResult mapCapability(List<SecOps_Capability__mdt> rows) {
+        CapabilityProbe.ProbeResult result = new CapabilityProbe.ProbeResult();
         if (!rows.isEmpty()) {
             SecOps_Capability__mdt row = rows[0];
             result.hasEventLogFile = row.EventLogFile_Available__c == true;

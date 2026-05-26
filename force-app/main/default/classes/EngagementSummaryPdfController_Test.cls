@@ -35,18 +35,20 @@ private class EngagementSummaryPdfController_Test {
         List<Security_Finding__c> findings = new List<Security_Finding__c>{
             new Security_Finding__c(
                 Detection_Rule__c = 'Test_Rule',
-                Category__c = 'Identity',
+                Category__c = 'Login Anomaly',
                 Severity__c = 'Critical',
                 Status__c = 'New',
                 Risk_Score__c = 90,
+                Source_Event_Id__c = 'evt-pdf-1',
                 Scan_Run__c = run.Id
             ),
             new Security_Finding__c(
                 Detection_Rule__c = 'Test_Rule',
-                Category__c = 'Identity',
+                Category__c = 'Login Anomaly',
                 Severity__c = 'High',
                 Status__c = 'Acknowledged',
                 Risk_Score__c = 60,
+                Source_Event_Id__c = 'evt-pdf-2',
                 Scan_Run__c = run.Id
             )
         };

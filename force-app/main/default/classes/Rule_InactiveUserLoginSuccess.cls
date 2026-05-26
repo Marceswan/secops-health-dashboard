@@ -43,7 +43,25 @@ public with sharing class Rule_InactiveUserLoginSuccess implements DetectionRule
         for (User u : [SELECT Id FROM User WHERE Id IN :userIds AND IsActive = FALSE]) {
             inactiveUserIds.add(u.Id);
         }
-        if (inactiveUserIds.isEmpty()) {
+
+        return evaluateRows(ctx, recentSuccess, inactiveUserIds);
+    }
+
+    /**
+     * Raise a critical finding for each pre-fetched successful LoginHistory row
+     * whose user is in the supplied inactive-user set. Extracted from evaluate()
+     * so it can be unit tested with in-memory LoginHistory rows (a read-only
+     * platform object that cannot be inserted in tests). Behavior is identical
+     * to the inline logic, including the early return when no users are inactive.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(
+        DetectionContext ctx,
+        List<LoginHistory> recentSuccess,
+        Set<Id> inactiveUserIds
+    ) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        if (inactiveUserIds == null || inactiveUserIds.isEmpty()) {
             return findings;
         }
 
@@ -53,7 +71,7 @@ public with sharing class Rule_InactiveUserLoginSuccess implements DetectionRule
             }
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'Inactive_User_Login_Success',
                 'Login Anomaly',
                 SecOpsConstants.SEVERITY_CRITICAL,
                 lh.UserId,

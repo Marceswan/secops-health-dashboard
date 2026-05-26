@@ -31,11 +31,28 @@ public with sharing class Rule_UnknownConnectedAppGranted implements DetectionRu
             knownAppIds.add(app.ConnectedApp_Id__c);
         }
 
-        for (OauthToken tok : [
+        List<OauthToken> tokens = [
             SELECT Id, UserId, AppName, AppMenuItem.ApplicationId, LastUsedDate, CreatedDate
             FROM OauthToken
             LIMIT 5000
-        ]) {
+        ];
+
+        return evaluateRows(ctx, tokens, knownAppIds);
+    }
+
+    /**
+     * Build a finding per token whose application is absent from the vetted set.
+     * Separated from the SOQL so tests can pass read-only OauthToken rows (the
+     * object is not insertable) plus a pre-built set of known ConnectedApp ids.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(
+        DetectionContext ctx,
+        List<OauthToken> tokens,
+        Set<String> knownAppIds
+    ) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (OauthToken tok : tokens) {
             String applicationId = tok.AppMenuItem == null ? null : tok.AppMenuItem.ApplicationId;
             if (applicationId == null) {
                 continue;
@@ -45,7 +62,7 @@ public with sharing class Rule_UnknownConnectedAppGranted implements DetectionRu
             }
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'Unknown_ConnectedApp_Granted',
                 'OAuth Risk',
                 SecOpsConstants.SEVERITY_MEDIUM,
                 tok.UserId,

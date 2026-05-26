@@ -14,42 +14,12 @@
 public with sharing class BaselineEngine {
     /** Build (but do not insert) a User_Baseline__c for a given user. */
     public static User_Baseline__c buildForUser(Id userId, Datetime sinceWhen) {
-        Set<String> countries = new Set<String>();
-        Set<String> ip24s = new Set<String>();
-        Set<String> browsers = new Set<String>();
-        Integer[] hourCounts = new Integer[24];
-        for (Integer i = 0; i < 24; i++) {
-            hourCounts[i] = 0;
-        }
-        Integer sample = 0;
-
-        for (LoginHistory lh : [
+        List<LoginHistory> logins = [
             SELECT Id, UserId, SourceIp, CountryIso, Browser, LoginTime, Status
             FROM LoginHistory
             WHERE UserId = :userId AND LoginTime >= :sinceWhen
-            LIMIT 50000
-        ]) {
-            if (lh.Status != 'Success') {
-                continue;
-            }
-            sample++;
-            if (lh.CountryIso != null) {
-                countries.add(lh.CountryIso);
-            }
-            if (lh.Browser != null) {
-                browsers.add(lh.Browser);
-            }
-            String ip24 = toIp24(lh.SourceIp);
-            if (ip24 != null) {
-                ip24s.add(ip24);
-            }
-            if (lh.LoginTime != null) {
-                Integer h = lh.LoginTime.hour();
-                if (h >= 0 && h < 24) {
-                    hourCounts[h] = hourCounts[h] + 1;
-                }
-            }
-        }
+            LIMIT 40000
+        ];
 
         Set<String> appNames = new Set<String>();
         for (OauthToken tok : [
@@ -63,13 +33,111 @@ public with sharing class BaselineEngine {
             }
         }
 
+        return buildFromRecords(userId, logins, appNames);
+    }
+
+    /**
+     * Bulk variant of buildForUser: builds baselines for many users with a
+     * fixed two SOQL queries (LoginHistory + OauthToken) regardless of how many
+     * users are passed in. Callers that iterate over a user set MUST use this
+     * instead of calling buildForUser per user, which would breach the SOQL
+     * governor limit.
+     *
+     * @return Map keyed by User Id; every input id is present in the result.
+     */
+    public static Map<Id, User_Baseline__c> buildForUsers(Set<Id> userIds, Datetime sinceWhen) {
+        Map<Id, User_Baseline__c> out = new Map<Id, User_Baseline__c>();
+        if (userIds == null || userIds.isEmpty()) {
+            return out;
+        }
+
+        // Row limits are kept comfortably below the 50k per-transaction cap so
+        // that the LoginHistory + OauthToken reads combined cannot breach it,
+        // even when the caller hands us a chunk of heavy-login users.
+        Map<Id, List<LoginHistory>> loginsByUser = new Map<Id, List<LoginHistory>>();
+        for (LoginHistory lh : [
+            SELECT Id, UserId, SourceIp, CountryIso, Browser, LoginTime, Status
+            FROM LoginHistory
+            WHERE UserId IN :userIds AND LoginTime >= :sinceWhen
+            LIMIT 40000
+        ]) {
+            List<LoginHistory> bucket = loginsByUser.get(lh.UserId);
+            if (bucket == null) {
+                bucket = new List<LoginHistory>();
+                loginsByUser.put(lh.UserId, bucket);
+            }
+            bucket.add(lh);
+        }
+
+        Map<Id, Set<String>> appsByUser = new Map<Id, Set<String>>();
+        for (OauthToken tok : [
+            SELECT Id, AppName, UserId
+            FROM OauthToken
+            WHERE UserId IN :userIds
+            LIMIT 8000
+        ]) {
+            Set<String> apps = appsByUser.get(tok.UserId);
+            if (apps == null) {
+                apps = new Set<String>();
+                appsByUser.put(tok.UserId, apps);
+            }
+            if (tok.AppName != null) {
+                apps.add(tok.AppName);
+            }
+        }
+
+        for (Id uid : userIds) {
+            out.put(uid, buildFromRecords(uid, loginsByUser.get(uid), appsByUser.get(uid)));
+        }
+        return out;
+    }
+
+    /**
+     * Aggregate pre-fetched LoginHistory and OAuth app names into a baseline.
+     * Stateless and SOQL-free so both the single and bulk builders can share it.
+     */
+    private static User_Baseline__c buildFromRecords(Id userId, List<LoginHistory> logins, Set<String> appNames) {
+        Set<String> countries = new Set<String>();
+        Set<String> ip24s = new Set<String>();
+        Set<String> browsers = new Set<String>();
+        Integer[] hourCounts = new Integer[24];
+        for (Integer i = 0; i < 24; i++) {
+            hourCounts[i] = 0;
+        }
+        Integer sample = 0;
+
+        if (logins != null) {
+            for (LoginHistory lh : logins) {
+                if (lh.Status != 'Success') {
+                    continue;
+                }
+                sample++;
+                if (lh.CountryIso != null) {
+                    countries.add(lh.CountryIso);
+                }
+                if (lh.Browser != null) {
+                    browsers.add(lh.Browser);
+                }
+                String ip24 = toIp24(lh.SourceIp);
+                if (ip24 != null) {
+                    ip24s.add(ip24);
+                }
+                if (lh.LoginTime != null) {
+                    Integer h = lh.LoginTime.hour();
+                    if (h >= 0 && h < 24) {
+                        hourCounts[h] = hourCounts[h] + 1;
+                    }
+                }
+            }
+        }
+
         User_Baseline__c b = new User_Baseline__c();
         b.User__c = userId;
         b.User_Id_External__c = userId;
         b.Country_Set__c = joinSet(countries);
         b.Ip24_Set__c = joinSet(ip24s);
         b.Browser_Set__c = joinSet(browsers);
-        b.App_Set__c = joinSet(appNames);
+        b.App_Set__c = joinSet(appNames == null ? new Set<String>() : appNames);
         b.Hour_Histogram__c = JSON.serialize(hourCounts);
         b.Sample_Size__c = sample;
         b.Last_Refreshed__c = Datetime.now();

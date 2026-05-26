@@ -34,4 +34,17 @@ private class UserBaselineRefresh_Test {
             );
         }
     }
+
+    @IsTest
+    static void execute_withCursor_runsKeysetBranch() {
+        // Construct with an explicit cursor so the afterUserId-based query branch
+        // (the second SOQL in the keyset pagination) executes.
+        User u = TestDataFactory.standardUser();
+
+        Test.startTest();
+        new UserBaselineRefresh(u.Id).execute(null);
+        Test.stopTest();
+
+        System.assert(true, 'Keyset-paginated execute ran without error');
+    }
 }

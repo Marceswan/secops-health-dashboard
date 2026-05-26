@@ -15,10 +15,9 @@ public with sharing class Rule_PrivilegedPermSetGranted implements DetectionRule
     }
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         Datetime cutoff = Datetime.now().addHours(-24);
 
-        for (PermissionSetAssignment psa : [
+        List<PermissionSetAssignment> rows = [
             SELECT
                 Id,
                 AssigneeId,
@@ -34,10 +33,22 @@ public with sharing class Rule_PrivilegedPermSetGranted implements DetectionRule
                 OR PermissionSet.PermissionsManageUsers = TRUE
                 OR PermissionSet.Label LIKE '%admin%')
             LIMIT 5000
-        ]) {
+        ];
+        return evaluateRows(ctx, rows);
+    }
+
+    /**
+     * Build a finding per privileged assignment. Separated from the SOQL so tests
+     * can pass in-memory PermissionSetAssignment rows; the production filter lives
+     * in evaluate()'s query.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(DetectionContext ctx, List<PermissionSetAssignment> rows) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (PermissionSetAssignment psa : rows) {
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'Privileged_PermSet_Granted',
                 'Privilege Escalation',
                 SecOpsConstants.SEVERITY_HIGH,
                 psa.AssigneeId,

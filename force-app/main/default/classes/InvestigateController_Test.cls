@@ -1,5 +1,16 @@
 @IsTest
 private class InvestigateController_Test {
+    // InvestigateController issues several WITH SECURITY_ENFORCED queries that
+    // select non-required fields (e.g. Subject_User__c, Source_Event_Json__c).
+    // A freshly deployed org grants no FLS on those fields. Permission-set FLS
+    // assigned to the current user does not take effect within the same test, so
+    // create a separate empowered user in setup and run the FLS-sensitive
+    // controller calls via System.runAs(...).
+    @TestSetup
+    static void makeData() {
+        TestDataFactory.empoweredUser();
+    }
+
     @IsTest
     static void listActiveUsers_returnsAtLeastCurrentUser() {
         Test.startTest();
@@ -64,8 +75,12 @@ private class InvestigateController_Test {
         );
         insert f;
 
+        User agent = TestDataFactory.getEmpoweredUser();
         Test.startTest();
-        List<Map<String, Object>> rows = InvestigateController.getCrossUserHeatmap(30);
+        List<Map<String, Object>> rows;
+        System.runAs(agent) {
+            rows = InvestigateController.getCrossUserHeatmap(30);
+        }
         Test.stopTest();
 
         System.assertNotEquals(null, rows, 'Heatmap should never return null');
@@ -127,8 +142,12 @@ private class InvestigateController_Test {
         );
         insert f;
 
+        User agent = TestDataFactory.getEmpoweredUser();
         Test.startTest();
-        List<String> diff = InvestigateController.diffAgainstBaseline(f.Id);
+        List<String> diff;
+        System.runAs(agent) {
+            diff = InvestigateController.diffAgainstBaseline(f.Id);
+        }
         Test.stopTest();
 
         System.assertNotEquals(null, diff, 'Diff should never return null');
@@ -154,5 +173,91 @@ private class InvestigateController_Test {
 
         System.assertEquals(b.ts, list1[0].ts, 'Newer timestamp should sort first');
         System.assertEquals(a.ts, list1[1].ts, 'Older timestamp should sort last');
+    }
+
+    @IsTest
+    static void listActiveUsers_capsAtTwoHundred() {
+        // A limit above 200 exercises the cap branch.
+        List<User> users = InvestigateController.listActiveUsers(500);
+        System.assertNotEquals(null, users, 'Should return a (capped) list');
+    }
+
+    @IsTest
+    static void diffAgainstBaseline_noBaseline_returnsEmpty() {
+        User u = TestDataFactory.standardUser();
+        SecOps_Scan_Run__c run = TestDataFactory.createScanRun();
+        Security_Finding__c f = FindingFactory.build(
+            run.Id,
+            'Unit_Test_Rule',
+            'Login Anomaly',
+            SecOpsConstants.SEVERITY_HIGH,
+            u.Id,
+            null,
+            'evt-nobaseline',
+            new Map<String, Object>{ 'countryIso' => 'CN' }
+        );
+        insert f;
+
+        User agent = TestDataFactory.getEmpoweredUser();
+        List<String> diff;
+        System.runAs(agent) {
+            diff = InvestigateController.diffAgainstBaseline(f.Id);
+        }
+        System.assertEquals(0, diff.size(), 'No baseline for the user yields an empty diff');
+    }
+
+    @IsTest
+    static void diffAgainstBaseline_blankPayload_returnsEmpty() {
+        User u = TestDataFactory.standardUser();
+        SecOps_Scan_Run__c run = TestDataFactory.createScanRun();
+        // Null payload -> Source_Event_Json__c is blank.
+        Security_Finding__c f = FindingFactory.build(
+            run.Id,
+            'Unit_Test_Rule',
+            'Login Anomaly',
+            SecOpsConstants.SEVERITY_HIGH,
+            u.Id,
+            null,
+            'evt-blankjson',
+            null
+        );
+        insert f;
+
+        User agent = TestDataFactory.getEmpoweredUser();
+        List<String> diff;
+        System.runAs(agent) {
+            diff = InvestigateController.diffAgainstBaseline(f.Id);
+        }
+        System.assertEquals(0, diff.size(), 'Blank payload yields an empty diff');
+    }
+
+    @IsTest
+    static void diffAgainstBaseline_unparseableJson_returnsEmpty() {
+        User u = TestDataFactory.standardUser();
+        User_Baseline__c b = BaselineEngine.buildForUser(u.Id, Datetime.now().addDays(-1));
+        b.User__c = u.Id;
+        b.User_Id_External__c = u.Id;
+        insert b;
+
+        SecOps_Scan_Run__c run = TestDataFactory.createScanRun();
+        Security_Finding__c f = FindingFactory.build(
+            run.Id,
+            'Unit_Test_Rule',
+            'Login Anomaly',
+            SecOpsConstants.SEVERITY_HIGH,
+            u.Id,
+            null,
+            'evt-badjson',
+            new Map<String, Object>{ 'x' => 1 }
+        );
+        f.Source_Event_Json__c = 'not valid json {';
+        insert f;
+
+        User agent = TestDataFactory.getEmpoweredUser();
+        List<String> diff;
+        System.runAs(agent) {
+            diff = InvestigateController.diffAgainstBaseline(f.Id);
+        }
+        System.assertEquals(0, diff.size(), 'Unparseable payload is swallowed and yields an empty diff');
     }
 }

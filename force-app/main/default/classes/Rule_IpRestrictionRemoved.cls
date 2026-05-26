@@ -17,16 +17,22 @@ public with sharing class Rule_IpRestrictionRemoved implements DetectionRule {
     }
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         Datetime cutoff = Datetime.now().addDays(-LOOKBACK_DAYS);
 
         // SetupAuditTrail.Display is not filterable in SOQL; match in Apex.
-        for (SetupAuditTrail s : [
+        List<SetupAuditTrail> rows = [
             SELECT Id, Action, Display, CreatedDate, CreatedById
             FROM SetupAuditTrail
             WHERE CreatedDate >= :cutoff
             LIMIT 1000
-        ]) {
+        ];
+        return evaluateRows(ctx, rows);
+    }
+
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(DetectionContext ctx, List<SetupAuditTrail> rows) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (SetupAuditTrail s : rows) {
             String disp = s.Display == null ? '' : s.Display;
             if (
                 !disp.containsIgnoreCase('Login IP Range') ||
@@ -36,7 +42,7 @@ public with sharing class Rule_IpRestrictionRemoved implements DetectionRule {
             }
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'IP_Restriction_Removed',
                 'Setup Change',
                 SecOpsConstants.SEVERITY_HIGH,
                 s.CreatedById,

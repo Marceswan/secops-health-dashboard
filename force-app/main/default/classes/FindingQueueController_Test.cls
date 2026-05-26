@@ -1,9 +1,25 @@
 @IsTest
 private class FindingQueueController_Test {
+    // FindingQueueController queries findings WITH SECURITY_ENFORCED, which checks
+    // the running user's field-level security. A freshly deployed org grants no FLS
+    // on the new fields even to a System Administrator. FLS from a permission set
+    // assigned to the *current* user does not take effect within the same test, so
+    // create a separate empowered user in setup and invoke the controller via
+    // System.runAs(...) below.
+    @TestSetup
+    static void makeData() {
+        TestDataFactory.empoweredUser();
+    }
+
     @IsTest
     static void getOpenFindings_returnsNonNullList() {
+        User agent = TestDataFactory.getEmpoweredUser();
+
         Test.startTest();
-        List<FindingQueueController.FindingRow> rows = FindingQueueController.getOpenFindings(null);
+        List<FindingQueueController.FindingRow> rows;
+        System.runAs(agent) {
+            rows = FindingQueueController.getOpenFindings(null);
+        }
         Test.stopTest();
 
         System.assertNotEquals(null, rows, 'Controller should never return null');
@@ -35,7 +51,11 @@ private class FindingQueueController_Test {
         );
         insert new List<Security_Finding__c>{ f1, f2 };
 
-        List<FindingQueueController.FindingRow> rows = FindingQueueController.getOpenFindings(1);
+        User agent = TestDataFactory.getEmpoweredUser();
+        List<FindingQueueController.FindingRow> rows;
+        System.runAs(agent) {
+            rows = FindingQueueController.getOpenFindings(1);
+        }
         System.assertEquals(1, rows.size(), 'Explicit limit should cap results');
     }
 

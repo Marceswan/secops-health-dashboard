@@ -109,19 +109,34 @@ public with sharing class EventLogFileIngest extends IngestBase implements Datab
      * Parse a single EventLogFile blob into Security_Event__c rows.
      * Caps at ROW_CAP_PER_FILE to stay inside DML and heap limits.
      */
-    private List<Security_Event__c> parseFile(SObject elf) {
-        List<Security_Event__c> out = new List<Security_Event__c>();
+    @TestVisible
+    private static List<Security_Event__c> parseFile(SObject elf) {
         Blob logBlob;
         try {
             logBlob = (Blob) elf.get('LogFile');
         } catch (Exception e) {
-            return out;
+            return new List<Security_Event__c>();
         }
         if (logBlob == null) {
-            return out;
+            return new List<Security_Event__c>();
         }
 
         String csv = logBlob.toString();
+        String elfType = (String) elf.get('EventType');
+        return parseCsv(csv, elfType);
+    }
+
+    /**
+     * Pure transformation from a decoded EventLogFile CSV string + its
+     * EventType into Security_Event__c rows. Extracted from parseFile() so it
+     * can be unit tested with a plain CSV String (EventLogFile is read-only and
+     * cannot be inserted in tests). Behavior is identical to the prior inline
+     * logic: same header lookup, type mapping, row cap, and Source_Json__c
+     * truncation.
+     */
+    @TestVisible
+    private static List<Security_Event__c> parseCsv(String csv, String elfType) {
+        List<Security_Event__c> out = new List<Security_Event__c>();
         if (String.isBlank(csv)) {
             return out;
         }
@@ -139,7 +154,6 @@ public with sharing class EventLogFileIngest extends IngestBase implements Datab
         Integer timestampIdx = indexOfHeader(headers, 'TIMESTAMP_DERIVED');
         Integer userIdIdx = indexOfHeader(headers, 'USER_ID_DERIVED');
 
-        String elfType = (String) elf.get('EventType');
         String mappedType = SUPPORTED_EVENT_TYPES.contains(elfType) ? elfType : 'URI';
 
         Integer rowCount = 0;
@@ -176,7 +190,7 @@ public with sharing class EventLogFileIngest extends IngestBase implements Datab
     /**
      * Locate a header index by exact case-sensitive name; returns -1 if absent.
      */
-    private Integer indexOfHeader(List<String> headers, String name) {
+    private static Integer indexOfHeader(List<String> headers, String name) {
         for (Integer i = 0; i < headers.size(); i++) {
             if (name.equals(headers[i] == null ? '' : headers[i].trim().replace('"', ''))) {
                 return i;
@@ -189,7 +203,7 @@ public with sharing class EventLogFileIngest extends IngestBase implements Datab
      * Best-effort timestamp parse from the TIMESTAMP_DERIVED column.
      * Falls back to Datetime.now() if the column is missing or unparseable.
      */
-    private Datetime parseTimestamp(Integer idx, List<String> cells) {
+    private static Datetime parseTimestamp(Integer idx, List<String> cells) {
         if (idx < 0 || idx >= cells.size()) {
             return Datetime.now();
         }
@@ -209,7 +223,7 @@ public with sharing class EventLogFileIngest extends IngestBase implements Datab
      * Best-effort User Id parse from the USER_ID_DERIVED column.
      * Returns null if missing, blank, or not a valid 18-char Id.
      */
-    private Id parseUserId(Integer idx, List<String> cells) {
+    private static Id parseUserId(Integer idx, List<String> cells) {
         if (idx < 0 || idx >= cells.size()) {
             return null;
         }
@@ -232,7 +246,7 @@ public with sharing class EventLogFileIngest extends IngestBase implements Datab
      * Simple CSV line splitter that respects double-quoted fields containing
      * commas. EventLogFile output is well-formed CSV so this is sufficient.
      */
-    private List<String> splitCsvLine(String line) {
+    private static List<String> splitCsvLine(String line) {
         List<String> out = new List<String>();
         if (line == null) {
             return out;

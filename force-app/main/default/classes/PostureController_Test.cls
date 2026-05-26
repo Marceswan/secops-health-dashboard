@@ -14,10 +14,11 @@ private class PostureController_Test {
         SecOps_Scan_Run__c run = TestDataFactory.createScanRun();
         Security_Finding__c f = new Security_Finding__c(
             Detection_Rule__c = 'Test_Rule',
-            Category__c = 'Identity',
+            Category__c = 'Login Anomaly',
             Severity__c = 'Critical',
             Status__c = 'New',
             Risk_Score__c = 80,
+            Source_Event_Id__c = 'evt-trend-1',
             Scan_Run__c = run.Id
         );
         insert f;
@@ -81,10 +82,11 @@ private class PostureController_Test {
             findings.add(
                 new Security_Finding__c(
                     Detection_Rule__c = 'Test_Rule',
-                    Category__c = 'Identity',
+                    Category__c = 'Login Anomaly',
                     Severity__c = 'High',
                     Status__c = 'New',
                     Risk_Score__c = 50,
+                    Source_Event_Id__c = 'evt-user-' + i,
                     Subject_User__c = u.Id,
                     Scan_Run__c = run.Id
                 )
@@ -113,10 +115,11 @@ private class PostureController_Test {
             findings.add(
                 new Security_Finding__c(
                     Detection_Rule__c = 'Test_Rule',
-                    Category__c = 'OAuth',
+                    Category__c = 'OAuth Risk',
                     Severity__c = 'Medium',
                     Status__c = 'New',
                     Risk_Score__c = 30,
+                    Source_Event_Id__c = 'evt-app-' + i,
                     Subject_App__c = app.Id,
                     Scan_Run__c = run.Id
                 )

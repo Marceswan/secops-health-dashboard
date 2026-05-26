@@ -19,16 +19,29 @@ public with sharing class Rule_FailedMfaBurst implements DetectionRule {
     }
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         Datetime cutoff = Datetime.now().addHours(-WINDOW_HOURS);
-        Map<Id, Integer> failuresByUser = new Map<Id, Integer>();
-
-        for (LoginHistory lh : [
+        List<LoginHistory> rows = [
             SELECT Id, UserId, Status, LoginTime
             FROM LoginHistory
             WHERE LoginTime >= :cutoff AND UserId != NULL
             LIMIT 50000
-        ]) {
+        ];
+        return evaluateRows(ctx, rows);
+    }
+
+    /**
+     * Tally MFA-related failures per user across pre-fetched LoginHistory rows
+     * and raise a finding for each user at or above the failure threshold.
+     * Extracted from evaluate() so it can be unit tested with in-memory
+     * LoginHistory rows (a read-only platform object that cannot be inserted in
+     * tests). Behavior is identical to the inline logic.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(DetectionContext ctx, List<LoginHistory> rows) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        Map<Id, Integer> failuresByUser = new Map<Id, Integer>();
+
+        for (LoginHistory lh : rows) {
             String st = lh.Status == null ? '' : lh.Status;
             Boolean isMfaFailure =
                 st.containsIgnoreCase('verification') ||
@@ -49,7 +62,7 @@ public with sharing class Rule_FailedMfaBurst implements DetectionRule {
             String sourceEventId = 'mfa-burst-' + userId + '-' + Datetime.now().getTime();
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'Failed_MFA_Burst',
                 'Login Anomaly',
                 SecOpsConstants.SEVERITY_MEDIUM,
                 userId,

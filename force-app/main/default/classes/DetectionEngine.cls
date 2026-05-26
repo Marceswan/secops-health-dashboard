@@ -39,10 +39,35 @@ public with sharing class DetectionEngine {
             WHERE Is_Active__c = TRUE
         ];
 
+        return evaluateRules(
+            scanRunId,
+            rules,
+            caps.hasEventLogFile,
+            caps.hasRealTimeEventMonitoring,
+            windowStart,
+            windowEnd
+        );
+    }
+
+    /**
+     * Execute a supplied set of rule configurations. Separated from evaluateAll so
+     * it can be exercised in tests with in-memory Detection_Rule__mdt records,
+     * since CMDT rows cannot be created via DML in tests and may be deployed
+     * separately from this code.
+     */
+    @TestVisible
+    private static Integer evaluateRules(
+        Id scanRunId,
+        List<Detection_Rule__mdt> rules,
+        Boolean hasEventLogFile,
+        Boolean hasRealTimeEventMonitoring,
+        Datetime windowStart,
+        Datetime windowEnd
+    ) {
         List<Security_Finding__c> aggregated = new List<Security_Finding__c>();
         for (Detection_Rule__mdt rule : rules) {
             try {
-                if (!isCapabilitySatisfied(rule, caps)) {
+                if (!isCapabilitySatisfied(rule, hasEventLogFile, hasRealTimeEventMonitoring)) {
                     ScanRunService.appendLog(
                         scanRunId,
                         'DetectionEngine: skipping ' + rule.DeveloperName + ' (capability gate)'
@@ -58,8 +83,8 @@ public with sharing class DetectionEngine {
                     scanRunId,
                     windowStart,
                     windowEnd,
-                    caps.hasEventLogFile,
-                    caps.hasRealTimeEventMonitoring,
+                    hasEventLogFile,
+                    hasRealTimeEventMonitoring,
                     rule
                 );
                 List<Security_Finding__c> produced = impl.evaluate(ctx);
@@ -87,18 +112,22 @@ public with sharing class DetectionEngine {
 
     /**
      * Capability gating: a rule with Required_Capability__c set only runs when
-     * the matching capability flag in the probe result is true.
+     * the matching capability flag is true.
      */
-    private static Boolean isCapabilitySatisfied(Detection_Rule__mdt rule, CapabilityProbe.ProbeResult caps) {
+    private static Boolean isCapabilitySatisfied(
+        Detection_Rule__mdt rule,
+        Boolean hasEventLogFile,
+        Boolean hasRealTimeEventMonitoring
+    ) {
         String cap = rule.Required_Capability__c;
         if (cap == null || String.isBlank(cap)) {
             return true;
         }
         if ('EventLogFile'.equalsIgnoreCase(cap)) {
-            return caps.hasEventLogFile;
+            return hasEventLogFile;
         }
         if ('RealTimeEventMonitoring'.equalsIgnoreCase(cap)) {
-            return caps.hasRealTimeEventMonitoring;
+            return hasRealTimeEventMonitoring;
         }
         return true;
     }

@@ -19,15 +19,28 @@ public with sharing class Rule_FailedLoginBurst implements DetectionRule {
 
     public List<Security_Finding__c> evaluate(DetectionContext ctx) {
         Datetime cutoff = Datetime.now().addMinutes(-WINDOW_MINUTES);
-        List<Security_Finding__c> findings = new List<Security_Finding__c>();
-        Map<String, List<LoginHistory>> bySrcIp = new Map<String, List<LoginHistory>>();
-
-        for (LoginHistory lh : [
+        List<LoginHistory> rows = [
             SELECT Id, UserId, SourceIp, LoginTime, Status
             FROM LoginHistory
             WHERE LoginTime >= :cutoff AND SourceIp != NULL
             LIMIT 50000
-        ]) {
+        ];
+        return evaluateRows(ctx, rows);
+    }
+
+    /**
+     * Group pre-fetched LoginHistory rows by source IP and raise a finding for
+     * each IP at or above the failure threshold. Extracted from evaluate() so
+     * it can be unit tested with in-memory LoginHistory rows (a read-only
+     * platform object that cannot be inserted in tests). Behavior is identical
+     * to the inline logic.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(DetectionContext ctx, List<LoginHistory> rows) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        Map<String, List<LoginHistory>> bySrcIp = new Map<String, List<LoginHistory>>();
+
+        for (LoginHistory lh : rows) {
             if (lh.Status == 'Success') {
                 continue;
             }
@@ -38,12 +51,12 @@ public with sharing class Rule_FailedLoginBurst implements DetectionRule {
         }
 
         for (String ip : bySrcIp.keySet()) {
-            List<LoginHistory> rows = bySrcIp.get(ip);
-            if (rows.size() >= FAILURE_THRESHOLD) {
+            List<LoginHistory> ipRows = bySrcIp.get(ip);
+            if (ipRows.size() >= FAILURE_THRESHOLD) {
                 findings.add(
                     FindingFactory.build(
                         ctx.scanRunId,
-                        getDeveloperName(),
+                        'Failed_Login_Burst',
                         'Login Anomaly',
                         SecOpsConstants.SEVERITY_MEDIUM,
                         null,
@@ -51,7 +64,7 @@ public with sharing class Rule_FailedLoginBurst implements DetectionRule {
                         ip,
                         new Map<String, Object>{
                             'sourceIp' => ip,
-                            'failureCount' => rows.size(),
+                            'failureCount' => ipRows.size(),
                             'windowMinutes' => WINDOW_MINUTES
                         }
                     )

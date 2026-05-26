@@ -49,17 +49,36 @@ public with sharing class Rule_AdminWithThirdPartyToken implements DetectionRule
             return findings;
         }
 
-        for (OauthToken tok : [
+        List<OauthToken> tokens = [
             SELECT Id, UserId, AppName, AppMenuItem.ApplicationId, LastUsedDate, CreatedDate
             FROM OauthToken
             WHERE UserId IN :adminUserIds
             LIMIT 5000
-        ]) {
+        ];
+
+        return evaluateRows(ctx, tokens, appInventoryByConnectedAppId);
+    }
+
+    /**
+     * Build a finding per admin-owned token. Separated from the SOQL so tests can
+     * pass read-only OauthToken rows (the object is not insertable) plus a
+     * pre-built ConnectedApp_Id__c -> OAuth_App_Inventory__c Id map. The admin
+     * filtering itself lives in evaluate()'s query, so every token passed here is
+     * already admin-owned.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(
+        DetectionContext ctx,
+        List<OauthToken> tokens,
+        Map<String, Id> appInventoryByConnectedAppId
+    ) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
+        for (OauthToken tok : tokens) {
             String applicationId = tok.AppMenuItem == null ? null : tok.AppMenuItem.ApplicationId;
             Id subjectAppId = applicationId == null ? null : appInventoryByConnectedAppId.get(applicationId);
             Security_Finding__c f = FindingFactory.build(
                 ctx.scanRunId,
-                getDeveloperName(),
+                'Admin_With_Third_Party_Token',
                 'OAuth Risk',
                 SecOpsConstants.SEVERITY_HIGH,
                 tok.UserId,

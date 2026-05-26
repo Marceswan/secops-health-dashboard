@@ -36,6 +36,21 @@ public with sharing class Rule_BaselineNewApp implements DetectionRule {
         }
         Map<Id, User_Baseline__c> baselines = BaselineEngine.loadBaselines(userIds);
 
+        return evaluateRows(ctx, tokens, baselines);
+    }
+
+    /**
+     * Build a finding per token whose app is outside the user's warmed-up
+     * baseline. Separated from the SOQL so tests can pass read-only OauthToken
+     * rows (the object is not insertable) plus a pre-built baseline map.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(
+        DetectionContext ctx,
+        List<OauthToken> tokens,
+        Map<Id, User_Baseline__c> baselines
+    ) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         for (OauthToken tok : tokens) {
             User_Baseline__c b = baselines.get(tok.UserId);
             if (!BaselineEngine.isWarmedUp(b)) {
@@ -48,7 +63,7 @@ public with sharing class Rule_BaselineNewApp implements DetectionRule {
             findings.add(
                 FindingFactory.build(
                     ctx.scanRunId,
-                    getDeveloperName(),
+                    'Baseline_New_App',
                     'Baseline Deviation',
                     SecOpsConstants.SEVERITY_MEDIUM,
                     tok.UserId,

@@ -37,7 +37,7 @@ public with sharing class ScanController {
                 Findings_Created__c,
                 Error_Log__c
             FROM SecOps_Scan_Run__c
-            ORDER BY CreatedDate DESC
+            ORDER BY CreatedDate DESC, Id DESC
             LIMIT 1
         ];
         return rows.isEmpty() ? null : rows[0];

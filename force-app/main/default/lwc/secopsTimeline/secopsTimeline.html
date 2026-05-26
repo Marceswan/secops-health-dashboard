@@ -1,13 +1,16 @@
 <template>
     <lightning-card title="User Activity Timeline" icon-name="standard:event">
         <div class="slds-p-horizontal_medium slds-p-bottom_medium">
-            <lightning-combobox
+            <lightning-record-picker
                 label="User"
-                placeholder="Select a user"
-                options={userOptions}
+                placeholder="Search users..."
+                object-api-name="User"
                 value={selectedUserId}
+                matching-info={matchingInfo}
+                display-info={displayInfo}
+                filter={userFilter}
                 onchange={handleUserChange}>
-            </lightning-combobox>
+            </lightning-record-picker>
 
             <template lwc:if={loadError}>
                 <p class="slds-text-color_error slds-p-top_small">{loadError}</p>

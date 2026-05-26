@@ -36,6 +36,34 @@ public with sharing class OAuthInventoryIngest extends IngestBase {
         }
 
         Datetime now = Datetime.now();
+        List<OAuth_App_Inventory__c> upserts = buildInventory(apps, now);
+
+        try {
+            Database.UpsertResult[] results = Database.upsert(
+                upserts,
+                OAuth_App_Inventory__c.ConnectedApp_Id__c,
+                false
+            );
+            Integer ok = 0;
+            for (Database.UpsertResult r : results) {
+                if (r.isSuccess()) {
+                    ok++;
+                }
+            }
+            ScanRunService.appendLog(scanRunId, 'OAuthInventoryIngest: upserted ' + ok + ' OAuth_App_Inventory rows');
+        } catch (Exception e) {
+            ScanRunService.appendLog(scanRunId, 'OAuthInventoryIngest: upsert error ' + e.getMessage());
+        }
+    }
+
+    /**
+     * Transform the Tooling API ConnectedApplication row map into
+     * OAuth_App_Inventory__c records. Extracted from ingest() so it can be unit
+     * tested with plain in-memory maps without standing up an HTTP mock.
+     * Behavior is identical to the inline logic.
+     */
+    @TestVisible
+    private static List<OAuth_App_Inventory__c> buildInventory(Map<String, Map<String, Object>> apps, Datetime now) {
         List<OAuth_App_Inventory__c> upserts = new List<OAuth_App_Inventory__c>();
         for (String connectedAppId : apps.keySet()) {
             Map<String, Object> row = apps.get(connectedAppId);
@@ -60,22 +88,6 @@ public with sharing class OAuthInventoryIngest extends IngestBase {
             }
             upserts.add(inv);
         }
-
-        try {
-            Database.UpsertResult[] results = Database.upsert(
-                upserts,
-                OAuth_App_Inventory__c.ConnectedApp_Id__c,
-                false
-            );
-            Integer ok = 0;
-            for (Database.UpsertResult r : results) {
-                if (r.isSuccess()) {
-                    ok++;
-                }
-            }
-            ScanRunService.appendLog(scanRunId, 'OAuthInventoryIngest: upserted ' + ok + ' OAuth_App_Inventory rows');
-        } catch (Exception e) {
-            ScanRunService.appendLog(scanRunId, 'OAuthInventoryIngest: upsert error ' + e.getMessage());
-        }
+        return upserts;
     }
 }

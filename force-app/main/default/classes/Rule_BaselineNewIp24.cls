@@ -43,6 +43,22 @@ public with sharing class Rule_BaselineNewIp24 implements DetectionRule {
         }
         Map<Id, User_Baseline__c> baselines = BaselineEngine.loadBaselines(userIds);
 
+        return evaluateRows(ctx, rows, baselines);
+    }
+
+    /**
+     * Process pre-fetched successful LoginHistory rows against per-user
+     * baselines into findings. Extracted from evaluate() so it can be unit
+     * tested with in-memory LoginHistory rows (a read-only platform object that
+     * cannot be inserted in tests). Behavior is identical to the inline logic.
+     */
+    @TestVisible
+    private static List<Security_Finding__c> evaluateRows(
+        DetectionContext ctx,
+        List<LoginHistory> rows,
+        Map<Id, User_Baseline__c> baselines
+    ) {
+        List<Security_Finding__c> findings = new List<Security_Finding__c>();
         for (LoginHistory lh : rows) {
             String ip24 = BaselineEngine.toIp24(lh.SourceIp);
             if (ip24 == null) {
@@ -58,7 +74,7 @@ public with sharing class Rule_BaselineNewIp24 implements DetectionRule {
             findings.add(
                 FindingFactory.build(
                     ctx.scanRunId,
-                    getDeveloperName(),
+                    'Baseline_New_Ip24',
                     'Baseline Deviation',
                     SecOpsConstants.SEVERITY_MEDIUM,
                     lh.UserId,
